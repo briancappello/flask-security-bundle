@@ -1,0 +1,191 @@
+from flask import current_app as app, request
+from flask_controller_bundle import Controller, route
+from flask_security import current_user
+from flask_security.views import _ctx as security_template_ctx
+from flask_security.utils import get_message
+from flask_sqlalchemy_bundle import SessionManager
+from flask_unchained import injectable
+from werkzeug.datastructures import MultiDict
+
+from ..decorators import anonymous_user_required, auth_required
+from ..services import SecurityService, UserManager
+
+
+class SecurityController(Controller):
+    def __init__(self,
+                 security_service: SecurityService = injectable,
+                 session_manager: SessionManager = injectable,
+                 user_manager: UserManager = injectable,
+                 ):
+        self.security_service = security_service
+        self.session_manager = session_manager
+        self.user_manager = user_manager
+
+    @route(endpoint='security.login', methods=['GET', 'POST'])
+    @anonymous_user_required(msg='You are already logged in',
+                             category='success')
+    def login(self):
+        form = self._get_form('SECURITY_LOGIN_FORM')
+        if form.validate_on_submit():
+            self.security_service.login_user(form.user, form.remember.data)
+            self.after_this_request(self._commit)
+            return self.redirect('SECURITY_POST_LOGIN_VIEW')
+        elif form.errors:
+            form = self.security_service.process_login_errors(form)
+
+        return self.render('login',
+                           login_user_form=form,
+                           **security_template_ctx('login'))
+
+    @route(endpoint='security.logout')
+    def logout(self):
+        if current_user.is_authenticated:
+            self.security_service.logout_user()
+        return self.redirect('SECURITY_POST_LOGOUT_VIEW')
+
+    @route(endpoint='security.register', methods=['GET', 'POST'],
+           only_if=lambda app: app.config.get('SECURITY_REGISTERABLE'))
+    @anonymous_user_required
+    def register(self):
+        form_name = ('SECURITY_CONFIRM_REGISTER_FORM'
+                     if app.config.get('SECURITY_CONFIRMABLE')
+                     else 'SECURITY_REGISTER_FORM')
+        form = self._get_form(form_name)
+
+        if form.validate_on_submit():
+            user = self.user_manager.create(**form.to_dict())
+            self.security_service.register_user(user)
+
+            return self.redirect('SECURITY_POST_REGISTER_VIEW')
+
+        return self.render('register',
+                           register_user_form=form,
+                           **security_template_ctx('register'))
+
+    @route(endpoint='security.send_confirmation', methods=['GET', 'POST'],
+           only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
+    def send_confirmation_email(self):
+        """
+        View function which sends confirmation instructions
+        """
+        form = self._get_form('SECURITY_SEND_CONFIRMATION_FORM')
+        if form.validate_on_submit():
+            self.security_service.send_confirmation_instructions(form.user)
+            self.flash(*get_message('CONFIRMATION_REQUEST',
+                                    email=form.user.email))
+        return self.render('send_confirmation_email',
+                           send_confirmation_form=form,
+                           **security_template_ctx('send_confirmation'))
+
+    @route('/confirm/<token>', endpoint='security.confirm_email',
+           only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
+    def confirm_email(self, token):
+        expired, invalid, user = \
+            self.security_service.confirm_email_token_status(token)
+
+        if not user or invalid:
+            invalid = True
+            self.flash(*get_message('INVALID_CONFIRMATION_TOKEN'))
+
+        already_confirmed = user is not None and user.confirmed_at is not None
+
+        if expired and not already_confirmed:
+            self.security_service.send_confirmation_instructions(user)
+            self.flash(*get_message(
+                'CONFIRMATION_EXPIRED', email=user.email,
+                within=app.config.get('SECURITY_CONFIRM_EMAIL_WITHIN')))
+
+        if invalid or (expired and not already_confirmed):
+            return self.redirect('SECURITY_CONFIRM_ERROR_VIEW',
+                                 'security.send_confirmation')
+
+        if user != current_user:
+            self.security_service.logout_user()
+            self.security_service.login_user(user)
+
+        if self.security_service.confirm_user(user):
+            self.after_this_request(self._commit)
+            msg = 'EMAIL_CONFIRMED'
+        else:
+            msg = 'ALREADY_CONFIRMED'
+
+        self.flash(*get_message(msg))
+
+        return self.redirect('SECURITY_POST_CONFIRM_VIEW',
+                             'SECURITY_POST_LOGIN_VIEW')
+
+    @route(endpoint='security.forgot_password', methods=['GET', 'POST'],
+           only_if=lambda app: app.config.get('SECURITY_RECOVERABLE'))
+    @anonymous_user_required(msg='You are already logged in',
+                             category='success')
+    def forgot_password(self):
+        form = self._get_form('SECURITY_FORGOT_PASSWORD_FORM')
+
+        if form.validate_on_submit():
+            self.security_service.send_reset_password_instructions(form.user)
+            self.flash(*get_message('PASSWORD_RESET_REQUEST',
+                                    email=form.user.email))
+
+        return self.render('forgot_password',
+                           forgot_password_form=form,
+                           **security_template_ctx('forgot_password'))
+
+    @route('/reset-password/<token>', methods=['GET', 'POST'],
+           endpoint='security.reset_password',
+           only_if=lambda app: app.config.get('SECURITY_RECOVERABLE'))
+    @anonymous_user_required
+    def reset_password(self, token):
+        expired, invalid, user = \
+            self.security_service.reset_password_token_status(token)
+
+        if invalid:
+            self.flash(*get_message('INVALID_RESET_PASSWORD_TOKEN'))
+        if expired:
+            self.security_service.send_reset_password_instructions(user)
+            self.flash(*get_message(
+                'PASSWORD_RESET_EXPIRED', email=user.email,
+                within=app.config.get('SECURITY_RESET_PASSWORD_WITHIN')))
+        if invalid or expired:
+            return self.redirect('security.forgot_password')
+
+        form = self._get_form('SECURITY_RESET_PASSWORD_FORM')
+        if form.validate_on_submit():
+            self.security_service.update_password(user, form.password.data)
+            self.security_service.login_user(user)
+            self.after_this_request(self._commit)
+            self.flash(*get_message('PASSWORD_RESET'))
+            return self.redirect('SECURITY_POST_RESET_VIEW',
+                                 'SECURITY_POST_LOGIN_VIEW')
+
+        return self.render('reset_password',
+                           reset_password_form=form,
+                           reset_password_token=token,
+                           **security_template_ctx('reset_password'))
+
+    @route(endpoint='security.change_password', methods=['GET', 'POST'],
+           only_if=lambda app: app.config.get('SECURITY_CHANGEABLE'))
+    @auth_required
+    def change_password(self):
+        form = self._get_form('SECURITY_CHANGE_PASSWORD_FORM')
+
+        if form.validate_on_submit():
+            user = current_user._get_current_object()
+            self.security_service.update_password(user, form.new_password.data)
+            self.after_this_request(self._commit)
+            self.flash(*get_message('PASSWORD_CHANGE'))
+            return self.redirect('SECURITY_POST_CHANGE_VIEW',
+                                 'SECURITY_POST_LOGIN_VIEW')
+
+        return self.render('change_password',
+                           change_password_form=form,
+                           **security_template_ctx('change_password'))
+
+    def _get_form(self, name):
+        form_cls = app.config.get(name)
+        if request.is_json:
+            return form_cls(MultiDict(request.get_json()))
+        return form_cls(request.form)
+
+    def _commit(self, response=None):
+        self.session_manager.commit()
+        return response

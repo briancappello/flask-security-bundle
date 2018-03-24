@@ -1,0 +1,6 @@
+{% extends 'layout.html' %}
+
+{% block body %}
+  {{ super() }}
+  {% include 'security/login_form.html' %}
+{% endblock %}
