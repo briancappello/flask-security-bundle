@@ -30,13 +30,14 @@ from flask_security.utils import (
     send_mail as security_send_mail,
 )
 from flask_security.views import _security as security
-from flask_sqlalchemy_bundle import SessionManager
 from flask_unchained import BaseService, injectable
+
+from .user_manager import UserManager
 
 
 class SecurityService(BaseService):
-    def __init__(self, session_manager: SessionManager = injectable):
-        self.session_manager = session_manager
+    def __init__(self, user_manager: UserManager = injectable):
+        self.user_manager = user_manager
 
     def login_user(self, user, remember=None):
         """
@@ -89,7 +90,7 @@ class SecurityService(BaseService):
 
         # confirmation token depends on having user.id set, which requires
         # the user be committed to the database
-        self.session_manager.add(user, commit=True)
+        self.user_manager.save(user, commit=True)
 
         confirmation_link, token = None, None
         if security.confirmable:
@@ -113,13 +114,13 @@ class SecurityService(BaseService):
 
     def change_password(self, user, password):
         user.password = password
-        self.session_manager.add(user, commit=True)
+        self.user_manager.save(user)
         self.send_password_changed_notice(user)
         password_changed.send(app._get_current_object(), user=user)
 
     def reset_password(self, user, password):
         user.password = password
-        self.session_manager.add(user, commit=True)
+        self.user_manager.save(user)
         self.send_password_reset_notice(user)
         password_reset.send(app._get_current_object(), user=user)
 
@@ -172,6 +173,6 @@ class SecurityService(BaseService):
         if user != current_user:
             self.logout_user()
             self.login_user(user)
-        self.session_manager.add(user)
+        self.user_manager.save(user)
         user_confirmed.send(app._get_current_object(), user=user)
         return True

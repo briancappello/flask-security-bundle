@@ -207,6 +207,7 @@ class SecurityController(Controller):
         if form.validate_on_submit():
             self.security_service.change_password(current_user,
                                                   form.new_password.data)
+            self.after_this_request(self._commit)
             self.flash(*get_message('PASSWORD_CHANGE'))
             if request.is_json:
                 return self.jsonify({'token': current_user.get_auth_token()})

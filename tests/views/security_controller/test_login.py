@@ -61,7 +61,7 @@ class TestApiLogin:
     def test_active_user_required(self, api_client, user,
                                   session_manager: SessionManager):
         user.active = False
-        session_manager.add(user, commit=True)
+        session_manager.save(user, commit=True)
         r = api_client.post('security_api.login',
                             data=dict(email=user.email, password='password'))
         assert r.status_code == 401

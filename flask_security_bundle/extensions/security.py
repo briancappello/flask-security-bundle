@@ -2,6 +2,10 @@ from http import HTTPStatus
 from flask import Flask, abort, current_app
 from flask_security import Security as BaseSecurity
 from flask_security.core import _context_processor as security_context_processor
+from flask_sqlalchemy_bundle import SessionManager
+
+from ..services import UserManager, RoleManager
+from ..services._datastore_adapter import DatastoreAdapter
 
 
 class Security(BaseSecurity):
@@ -28,6 +32,13 @@ class Security(BaseSecurity):
 
         app.context_processor(security_context_processor)
         app.extensions['security'] = self
+
+    def inject_services(self,
+                        user_manager: UserManager,
+                        role_manager: RoleManager,
+                        session_manager: SessionManager = None):
+        self.datastore = DatastoreAdapter(
+            user_manager, role_manager, session_manager)
 
     def __getattr__(self, name):
         """

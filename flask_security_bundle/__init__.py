@@ -5,8 +5,7 @@ from .decorators import (
     auth_required,
     auth_required_same_user,
 )
-from .services import (
-    SecurityService, SQLAlchemyUserDatastore, UserManager, RoleManager)
+from .services import SecurityService, UserManager, RoleManager
 from .views import SecurityController, UserResource
 
 
