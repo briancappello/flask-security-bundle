@@ -1,7 +1,5 @@
 ## documentation
 
-# clean up the hash_password bullshit sprinkled throughout flask_security
-
 * implement improvements from https://news.ycombinator.com/item?id=16356397 and http://habitatchronicles.com/2008/10/the-tripartite-identity-pattern/
     > refactor concept of user identities (well really, it more just needs implementing because flask-security has a complete shit concept of user identities)
     > improve email uniqueness checks (unicode)

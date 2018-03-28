@@ -22,15 +22,6 @@ class User(db.Model, UserMixin):
 
     __repr_props__ = ('id', 'email', 'active')
 
-    def __init__(self, hash_password=True, **kwargs):
-        password = kwargs.pop('password', None)
-        if password and hash_password:
-            self.password = password
-        else:
-            self._password = password
-
-        super().__init__(**kwargs)
-
     @db.hybrid_property
     def password(self):
         return self._password
