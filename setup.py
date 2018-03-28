@@ -33,4 +33,9 @@ setup(
     install_requires=read_requirements('requirements.txt'),
     include_package_data=True,
     zip_safe=False,
+    entry_points={
+        'pytest11': [
+            'flask_security_bundle = flask_security_bundle.pytest',
+        ],
+    },
 )
