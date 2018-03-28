@@ -1,5 +1,5 @@
 from http import HTTPStatus
-from flask import Flask, abort, current_app
+from flask import Flask, abort, current_app as app
 from flask_security import Security as BaseSecurity
 from flask_security.core import _context_processor as security_context_processor
 from flask_sqlalchemy_bundle import SessionManager
@@ -54,4 +54,8 @@ class Security(BaseSecurity):
         state_value = getattr(self._state, name, None)
         if name in {'i18n_domain'}:
             return state_value
-        return current_app.config.get(('SECURITY_' + name).upper(), state_value)
+
+        try:
+            return app.config.get(('SECURITY_' + name).upper(), state_value)
+        except RuntimeError:
+            raise AttributeError(name)
