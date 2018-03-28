@@ -1,23 +1,14 @@
-from datetime import datetime, timezone
-from flask import current_app as app, session
+from flask import current_app as app
 from flask_controller_bundle import get_url
-from flask_login import logout_user
-from flask_principal import AnonymousIdentity, identity_changed
-from flask_security import current_user
-from flask_security.changeable import (
-    send_password_changed_notice as security_send_password_changed_notice,
-)
 from flask_security.confirmable import (
-    send_confirmation_instructions as security_send_confirmation_instructions,
-    generate_confirmation_link as security_generate_confirmation_link,
-    confirm_email_token_status as security_confirm_email_token_status,
+    generate_confirmation_token as security_generate_confirmation_token,
 )
 from flask_security.recoverable import (
-    send_password_reset_notice as security_send_password_reset_notice,
     generate_reset_password_token as security_generate_reset_password_token,
     reset_password_token_status as security_reset_password_token_status,
 )
 from flask_security.signals import (
+    confirm_instructions_sent,
     password_changed,
     password_reset,
     reset_password_instructions_sent,
@@ -27,21 +18,25 @@ from flask_security.signals import (
 from flask_security.utils import (
     get_message as security_get_message,
     login_user as security_login_user,
+    logout_user as security_logout_user,
     send_mail as security_send_mail,
 )
-from flask_security.views import _security as security
 from flask_unchained import BaseService, injectable
 
 from .user_manager import UserManager
+from ..extensions import Security
 
 
 class SecurityService(BaseService):
-    def __init__(self, user_manager: UserManager = injectable):
+    def __init__(self,
+                 security: Security = injectable,
+                 user_manager: UserManager = injectable):
+        self.security = security
         self.user_manager = user_manager
 
     def login_user(self, user, remember=None):
         """
-        sends signal identity_changed
+        sends signal identity_changed (from flask_principal)
 
         Returns True if the user was successfully logged in, False otherwise
         """
@@ -66,16 +61,12 @@ class SecurityService(BaseService):
 
     def logout_user(self):
         """
-        logout the current user (if any)
+        Logs out the current user and cleans up the remember me cookie (if any)
 
         sends signal identity_changed (from flask_principal)
         sends signal user_logged_out (from flask_login)
         """
-        for key in ('identity.name', 'identity.auth_type'):
-            session.pop(key, None)
-        identity_changed.send(app._get_current_object(),
-                              identity=AnonymousIdentity())
-        return logout_user()
+        return security_logout_user()
 
     def register_user(self, user):
         """
@@ -85,7 +76,9 @@ class SecurityService(BaseService):
 
         Returns True if the user has been logged in, False otherwise.
         """
-        if not security.confirmable or security.login_without_confirmation:
+        should_login_user = (not self.security.confirmable
+                             or self.security.login_without_confirmation)
+        if should_login_user:
             user.active = True
 
         # confirmation token depends on having user.id set, which requires
@@ -93,8 +86,10 @@ class SecurityService(BaseService):
         self.user_manager.save(user, commit=True)
 
         confirmation_link, token = None, None
-        if security.confirmable:
-            confirmation_link, token = security_generate_confirmation_link(user)
+        if self.security.confirmable:
+            token = security_generate_confirmation_token(user)
+            confirmation_link = get_url('security.confirm_email',
+                                        token=token, _external=True)
 
         user_registered.send(app._get_current_object(),
                              user=user, confirm_token=token)
@@ -108,7 +103,7 @@ class SecurityService(BaseService):
                 user=user,
                 confirmation_link=confirmation_link)
 
-        if not security.confirmable or security.login_without_confirmation:
+        if should_login_user:
             return self.login_user(user)
         return False
 
@@ -129,15 +124,47 @@ class SecurityService(BaseService):
 
     def send_confirmation_instructions(self, user):
         """
+        Sends the confirmation instructions email for the specified user.
+
         sends signal confirm_instructions_sent
+
+        :param user: The user to send the instructions to
         """
-        return security_send_confirmation_instructions(user)
+        token = security_generate_confirmation_token(user)
+        confirmation_link = get_url('security.confirm_email',
+                                    token=token, _external=True)
+
+        # FIXME-mail
+        security_send_mail(app.config.get('SECURITY_EMAIL_SUBJECT_CONFIRM'),
+                           user.email, 'confirmation_instructions', user=user,
+                           confirmation_link=confirmation_link)
+
+        confirm_instructions_sent.send(app._get_current_object(), user=user,
+                                       token=token)
 
     def send_password_changed_notice(self, user):
-        return security_send_password_changed_notice(user)
+        """
+        Sends the password changed notice email for the specified user.
+
+        :param user: The user to send the notice to
+        """
+        if app.config.get('SECURITY_SEND_PASSWORD_CHANGE_EMAIL'):
+            # FIXME-mail
+            security_send_mail(
+                app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE'),
+                user.email, 'change_notice', user=user)
 
     def send_password_reset_notice(self, user):
-        return security_send_password_reset_notice(user)
+        """
+        Sends the password reset notice email for the specified user.
+
+        :param user: The user to send the notice to
+        """
+        if app.config.get('SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL'):
+            # FIXME-mail
+            security_send_mail(
+                app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_NOTICE'),
+                user.email, 'reset_notice', user=user)
 
     def send_reset_password_instructions(self, user):
         """
@@ -150,6 +177,7 @@ class SecurityService(BaseService):
                              token=token, _external=True)
 
         if app.config.get('SECURITY_SEND_PASSWORD_RESET_EMAIL'):
+            # FIXME-mail
             security_send_mail(
                 subject=app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_RESET'),
                 recipient=user.email,
@@ -158,21 +186,12 @@ class SecurityService(BaseService):
         reset_password_instructions_sent.send(app._get_current_object(),
                                               user=user, token=token)
 
-    def confirm_email_token_status(self, token):
-        return security_confirm_email_token_status(token)
-
     def confirm_user(self, user):
-        """Confirms the specified user
-
-        :param user: The user to confirm
-        """
+        """Confirms the specified user"""
         if user.confirmed_at is not None:
             return False
-        user.confirmed_at = datetime.now(timezone.utc)
+        user.confirmed_at = self.security.datetime_factory()
         user.active = True
-        if user != current_user:
-            self.logout_user()
-            self.login_user(user)
         self.user_manager.save(user)
         user_confirmed.send(app._get_current_object(), user=user)
         return True

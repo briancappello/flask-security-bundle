@@ -17,6 +17,6 @@
 
 * move all utility code that a user might want to customize into services
 
-* move all settings defaults from the ext into the config module
+* test SECURITY_TRACKABLE
 
-* refactor the security extension so it doesn't use the all of its PITA setattr/getattr un-comprehensible magic
+* test passwordless login (NOTE: upstream docs say it's experimental and should be used with caution.... maybe it be better to just not use it at all)

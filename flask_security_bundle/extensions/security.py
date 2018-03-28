@@ -1,61 +1,119 @@
-from http import HTTPStatus
-from flask import Flask, abort, current_app as app
-from flask_security import Security as BaseSecurity
-from flask_security.core import _context_processor as security_context_processor
-from flask_sqlalchemy_bundle import SessionManager
+from flask import Flask
+from flask_principal import identity_loaded
+from flask_security.core import (
+    _default_messages,
+    _get_hashing_context,
+    _get_i18n_domain,
+    _get_login_manager,
+    _get_principal,
+    _get_pwd_context,
+    _get_serializer,
+    _on_identity_loaded,
+)
+from flask_unchained.utils import ConfigProperty, ConfigPropertyMeta
+from types import FunctionType
 
-from ..services import UserManager, RoleManager
 from ..services._datastore_adapter import DatastoreAdapter
 
 
-class Security(BaseSecurity):
+class Security(metaclass=ConfigPropertyMeta):
+    changeable: bool = ConfigProperty()
+    confirmable: bool = ConfigProperty()
+    login_without_confirmation: bool = ConfigProperty()
+    recoverable: bool = ConfigProperty()
+    registerable: bool = ConfigProperty()
+    trackable: bool = ConfigProperty()
+
+    # FIXME-mail
+    email_sender: str = ConfigProperty()
+
+    token_authentication_header: str = ConfigProperty()
+    token_authentication_key: str = ConfigProperty()
+    token_max_age: str = ConfigProperty()
+
+    password_hash: str = ConfigProperty()
+    password_salt: str = ConfigProperty()
+
+    datetime_factory: FunctionType = ConfigProperty()
+    _unauthorized_callback: FunctionType = \
+        ConfigProperty('SECURITY_UNAUTHORIZED_CALLBACK')
+
+    def __init__(self):
+        self._context_processors = {}
+        self._send_mail_task = None
+
+        # properties set by init_app:
+        self.confirm_serializer = None
+        self.datastore = None
+        self.hashing_context = None
+        self.i18n_domain = None
+        self.login_manager = None
+        self.login_serializer = None
+        self.principal = None
+        self.pwd_context = None
+        self.remember_token_serializer = None
+        self.reset_serializer = None
+
     def init_app(self, app: Flask):
-        self._state = super().init_app(
-            app,
-            datastore=app.config.get('SECURITY_DATASTORE'),
-            login_form=app.config.get('SECURITY_LOGIN_FORM'),
-            confirm_register_form=app.config.get('SECURITY_CONFIRM_REGISTER_FORM'),
-            register_form=app.config.get('SECURITY_REGISTER_FORM'),
-            forgot_password_form=app.config.get('SECURITY_FORGOT_PASSWORD_FORM'),
-            reset_password_form=app.config.get('SECURITY_RESET_PASSWORD_FORM'),
-            change_password_form=app.config.get('SECURITY_CHANGE_PASSWORD_FORM'),
-            send_confirmation_form=app.config.get('SECURITY_SEND_CONFIRMATION_FORM'),
-            passwordless_login_form=app.config.get('SECURITY_PASSWORDLESS_LOGIN_FORM'),
-            anonymous_user=app.config.get('SECURITY_ANONYMOUS_USER'),
-            register_blueprint=False)
+        # FIXME-i18n
+        for key, value in _default_messages.items():
+            app.config.setdefault('SECURITY_MSG_' + key, value)
 
-        # override the unauthorized action to use abort(401)
-        self._state.unauthorized_handler(lambda: abort(HTTPStatus.UNAUTHORIZED))
+        self.confirm_serializer = _get_serializer(app, 'confirm')
+        self.hashing_context = _get_hashing_context(app)
+        self.i18n_domain = _get_i18n_domain(app)
+        self.login_manager = _get_login_manager(
+            app, app.config.get('SECURITY_ANONYMOUS_USER'))
+        self.login_serializer = _get_serializer(app, 'login')
+        self.principal = _get_principal(app)
+        self.pwd_context = _get_pwd_context(app)
+        self.remember_token_serializer = _get_serializer(app, 'remember')
+        self.reset_serializer = _get_serializer(app, 'reset')
 
-        # FIXME-mail: register a custom mail task using the mail service
-        # self._state.send_mail_task(send_mail_async)
+        # FIXME-mail: register a custom mail task using the mail service!
+        # self._send_mail_task = send_mail_async
 
-        app.context_processor(security_context_processor)
+        identity_loaded.connect_via(app)(_on_identity_loaded)
         app.extensions['security'] = self
 
-    def inject_services(self,
-                        user_manager: UserManager,
-                        role_manager: RoleManager,
-                        session_manager: SessionManager = None):
+    def inject_services(self, user_manager, role_manager, session_manager=None):
         self.datastore = DatastoreAdapter(
             user_manager, role_manager, session_manager)
 
-    def __getattr__(self, name):
-        """
-        The upstream extension is used as a proxy for configuration settings,
-        where code sprinkled throughout the flask_security package can reference
-        settings by their lowercased name (minus the SECURITY_ prefix) as an
-        attribute on the security extension. However, it was built in such a way
-        that it caches settings as they were at the time init_app was called,
-        without any way to later change them. Which of course is garbage,
-        especially for testing, so we need to override __getattr__ so that we
-        proxy those requests to app.config
-        """
-        state_value = getattr(self._state, name, None)
-        if name in {'i18n_domain'}:
-            return state_value
+    def context_processor(self, fn):
+        self._add_ctx_processor(None, fn)
 
-        try:
-            return app.config.get(('SECURITY_' + name).upper(), state_value)
-        except RuntimeError:
-            raise AttributeError(name)
+    def forgot_password_context_processor(self, fn):
+        self._add_ctx_processor('forgot_password', fn)
+
+    def login_context_processor(self, fn):
+        self._add_ctx_processor('login', fn)
+
+    def register_context_processor(self, fn):
+        self._add_ctx_processor('register', fn)
+
+    def reset_password_context_processor(self, fn):
+        self._add_ctx_processor('reset_password', fn)
+
+    def change_password_context_processor(self, fn):
+        self._add_ctx_processor('change_password', fn)
+
+    def send_confirmation_context_processor(self, fn):
+        self._add_ctx_processor('send_confirmation', fn)
+
+    def send_login_context_processor(self, fn):
+        self._add_ctx_processor('send_login', fn)
+
+    def mail_context_processor(self, fn):
+        self._add_ctx_processor('mail', fn)
+
+    def _add_ctx_processor(self, endpoint, fn):
+        group = self._context_processors.setdefault(endpoint, [])
+        fn not in group and group.append(fn)
+
+    def _run_ctx_processor(self, endpoint):
+        rv = {}
+        for group in [None, endpoint]:
+            for fn in self._context_processors.setdefault(group, []):
+                rv.update(fn())
+        return rv

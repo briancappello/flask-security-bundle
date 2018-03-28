@@ -17,11 +17,11 @@ from flask_security.forms import (
     email_validator,
     password_required,
 )
-from flask_security.utils import get_message, _security as security
+from flask_security.utils import get_message
 from flask_unchained import unchained, injectable
 from wtforms import fields
 
-from .services import UserManager
+from .services import SecurityService
 from .utils import verify_and_update_password
 
 
@@ -29,7 +29,7 @@ password_length = Length(min=8, max=255,
                          message='Password must be at least 8 characters long.')
 
 
-@unchained.inject('user_manager')
+@unchained.inject('security_service')
 class LoginForm(BaseForm, NextFormMixin):
     """The default login form"""
 
@@ -40,9 +40,10 @@ class LoginForm(BaseForm, NextFormMixin):
     remember = fields.BooleanField(get_form_field_label('remember_me'))
     submit = fields.SubmitField(get_form_field_label('login'))
 
-    def __init__(self, *args, user_manager: UserManager = injectable, **kwargs):
+    def __init__(self, *args, security_service: SecurityService = injectable,
+                 **kwargs):
         super().__init__(*args, **kwargs)
-        self.user_manager = user_manager
+        self.security_service = security_service
         self.user = None
 
         if not self.next.data:
@@ -50,7 +51,7 @@ class LoginForm(BaseForm, NextFormMixin):
         self.remember.default = app.config.get('SECURITY_DEFAULT_REMEMBER_ME')
 
     def get_user(self):
-        return self.user_manager.get_by(email=self.email.data)
+        return self.security_service.user_manager.get_by(email=self.email.data)
 
     def validate(self):
         if not super().validate():
@@ -67,8 +68,8 @@ class LoginForm(BaseForm, NextFormMixin):
         if not verify_and_update_password(self.password.data, self.user):
             self.password.errors.append(get_message('INVALID_PASSWORD')[0])
             return False
-        if (security.confirmable
-                and not security.login_without_confirmation
+        if (not self.security_service.security.login_without_confirmation
+                and self.security_service.security.confirmable
                 and self.user.confirmed_at is None):
             self.email.errors.append(get_message('CONFIRMATION_REQUIRED')[0])
             return False

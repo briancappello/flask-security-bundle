@@ -1,26 +1,20 @@
 from flask import current_app as app, request
 from flask_controller_bundle import Controller, route
 from flask_security import current_user
+from flask_security.confirmable import confirm_email_token_status
 from flask_security.views import _ctx as security_template_ctx
 from flask_security.utils import get_message
-from flask_sqlalchemy_bundle import SessionManager
 from flask_unchained import injectable
 from http import HTTPStatus
 from werkzeug.datastructures import MultiDict
 
 from ..decorators import anonymous_user_required, auth_required
-from ..services import SecurityService, UserManager
+from ..services import SecurityService
 
 
 class SecurityController(Controller):
-    def __init__(self,
-                 security_service: SecurityService = injectable,
-                 session_manager: SessionManager = injectable,
-                 user_manager: UserManager = injectable,
-                 ):
+    def __init__(self, security_service: SecurityService = injectable):
         self.security_service = security_service
-        self.session_manager = session_manager
-        self.user_manager = user_manager
 
     @route(only_if=False)  # require check_auth_token to be explicitly enabled
     @auth_required()
@@ -70,7 +64,7 @@ class SecurityController(Controller):
         form = self._get_form(form_name)
 
         if form.validate_on_submit():
-            user = self.user_manager.create(**form.to_dict())
+            user = self.security_service.user_manager.create(**form.to_dict())
             self.security_service.register_user(user)
 
             return self.redirect('SECURITY_POST_REGISTER_VIEW')
@@ -103,8 +97,7 @@ class SecurityController(Controller):
     @route('/confirm/<token>', endpoint='security.confirm_email',
            only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
     def confirm_email(self, token):
-        expired, invalid, user = \
-            self.security_service.confirm_email_token_status(token)
+        expired, invalid, user = confirm_email_token_status(token)
 
         if not user or invalid:
             invalid = True
@@ -228,5 +221,5 @@ class SecurityController(Controller):
         return form_cls(request.form)
 
     def _commit(self, response=None):
-        self.session_manager.commit()
+        self.security_service.security.datastore.commit()
         return response
