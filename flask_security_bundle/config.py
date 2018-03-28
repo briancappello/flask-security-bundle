@@ -42,6 +42,11 @@ class BaseConfig:
     SECURITY_CLI_USERS_NAME = None
     SECURITY_CLI_ROLES_NAME = None
 
+    SECURITY_RESET_PASSWORD_ENDPOINT = 'security.reset_password'
+    SECURITY_API_RESET_PASSWORD_HTTP_GET_REDIRECT = 'security.reset_password'
+    SECURITY_INVALID_RESET_TOKEN_REDIRECT = 'security.forgot_password'
+    SECURITY_EXPIRED_RESET_TOKEN_REDIRECT = 'security.forgot_password'
+
 
 class TestConfig(BaseConfig):
     TESTING = True

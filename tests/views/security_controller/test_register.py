@@ -1,6 +1,10 @@
 import pytest
 
+from tests._bundles.security.forms import ConfirmRegisterForm, RegisterForm
 
+
+@pytest.mark.options(SECURITY_REGISTER_FORM=RegisterForm,
+                     SECURITY_CONFIRM_REGISTER_FORM=ConfirmRegisterForm)
 class TestRegister:
     def test_get(self, client, templates):
         r = client.get('security.register')
@@ -26,9 +30,12 @@ class TestRegister:
 
     def test_register_confirmation_required(self, client, templates, outbox):
         r = client.post('security.register', data=dict(
+            username='hello',
             email='hello@example.com',
             password='password',
             password_confirm='password',
+            first_name='first',
+            last_name='last',
         ))
         assert r.status_code == 302
         assert r.path == '/'
@@ -39,9 +46,12 @@ class TestRegister:
     @pytest.mark.options(SECURITY_CONFIRMABLE=False)
     def test_register(self, client, templates, outbox):
         r = client.post('security.register', data=dict(
+            username='hello',
             email='hello@example.com',
             password='password',
             password_confirm='password',
+            first_name='first',
+            last_name='last',
         ))
         assert r.status_code == 302
         assert r.path == '/'

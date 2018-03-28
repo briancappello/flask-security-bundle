@@ -164,13 +164,12 @@ class TestAuthRequired:
                 raise MethodCalled
         assert 'specify only one of `role` or `roles` kwargs' in str(e)
 
-    # FIXME-token
-    # def test_works_with_token_auth(self, client, user):
-    #     client.login_as(user)
-    #
-    #     @auth_required(role='ROLE_USER')
-    #     def method():
-    #         raise MethodCalled
-    #
-    #     with pytest.raises(MethodCalled):
-    #         method()
+    def test_works_with_token_auth(self, client, user):
+        client.login_as(user)
+
+        @auth_required(role='ROLE_USER')
+        def method():
+            raise MethodCalled
+
+        with pytest.raises(MethodCalled):
+            method()

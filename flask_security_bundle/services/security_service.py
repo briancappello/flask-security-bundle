@@ -1,8 +1,12 @@
 from datetime import datetime, timezone
 from flask import current_app as app, session
+from flask_controller_bundle import get_url
 from flask_login import logout_user
 from flask_principal import AnonymousIdentity, identity_changed
 from flask_security import current_user
+from flask_security.changeable import (
+    send_password_changed_notice as security_send_password_changed_notice,
+)
 from flask_security.confirmable import (
     send_confirmation_instructions as security_send_confirmation_instructions,
     generate_confirmation_link as security_generate_confirmation_link,
@@ -10,11 +14,15 @@ from flask_security.confirmable import (
 )
 from flask_security.recoverable import (
     send_password_reset_notice as security_send_password_reset_notice,
-    send_reset_password_instructions as security_send_reset_password_instructions,
+    generate_reset_password_token as security_generate_reset_password_token,
     reset_password_token_status as security_reset_password_token_status,
 )
 from flask_security.signals import (
-    password_reset, user_confirmed, user_registered,
+    password_changed,
+    password_reset,
+    reset_password_instructions_sent,
+    user_confirmed,
+    user_registered,
 )
 from flask_security.utils import (
     get_message as security_get_message,
@@ -103,7 +111,13 @@ class SecurityService(BaseService):
             return self.login_user(user)
         return False
 
-    def update_password(self, user, password):
+    def change_password(self, user, password):
+        user.password = password
+        self.session_manager.add(user, commit=True)
+        self.send_password_changed_notice(user)
+        password_changed.send(app._get_current_object(), user=user)
+
+    def reset_password(self, user, password):
         user.password = password
         self.session_manager.add(user, commit=True)
         self.send_password_reset_notice(user)
@@ -118,11 +132,30 @@ class SecurityService(BaseService):
         """
         return security_send_confirmation_instructions(user)
 
+    def send_password_changed_notice(self, user):
+        return security_send_password_changed_notice(user)
+
     def send_password_reset_notice(self, user):
         return security_send_password_reset_notice(user)
 
     def send_reset_password_instructions(self, user):
-        return security_send_reset_password_instructions(user)
+        """
+        Sends the reset password instructions email for the specified user.
+
+        :param user: The user to send the instructions to
+        """
+        token = security_generate_reset_password_token(user)
+        reset_link = get_url('SECURITY_RESET_PASSWORD_ENDPOINT',
+                             token=token, _external=True)
+
+        if app.config.get('SECURITY_SEND_PASSWORD_RESET_EMAIL'):
+            security_send_mail(
+                subject=app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_RESET'),
+                recipient=user.email,
+                template='reset_instructions', user=user, reset_link=reset_link)
+
+        reset_password_instructions_sent.send(app._get_current_object(),
+                                              user=user, token=token)
 
     def confirm_email_token_status(self, token):
         return security_confirm_email_token_status(token)

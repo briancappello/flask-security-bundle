@@ -1,4 +1,5 @@
 BUNDLES = [
+    'flask_api_bundle',
     'flask_controller_bundle',
     'flask_mail_bundle',
     'flask_sqlalchemy_bundle',

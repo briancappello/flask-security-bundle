@@ -1,5 +1,3 @@
-# implement SecurityApiController
-
 ## documentation
 
 * implement improvements from https://news.ycombinator.com/item?id=16356397 and http://habitatchronicles.com/2008/10/the-tripartite-identity-pattern/
@@ -15,11 +13,11 @@
 
 * figure out a better solution to sending emails
 
-#### and the ultimate goal, stop depending on flask-security altogether
-> requires a robust solution to handling i18n in flask-unchained
-> move all utility code into services
-> remove the datastore abstraction layer
-> move all settings defaults from the ext into the config module
-    > probably wouldn't hurt to rename shit while you're at it
-> ideally, shouldn't need the security ext at all. it doesn't do anything useful
-> migrate tests from flask-security
+#### and maybe the ultimate goal, stop depending on flask-security altogether
+
+* requires a robust solution to handling i18n in flask-unchained
+* move all utility code into services
+* remove the datastore abstraction layer
+* move all settings defaults from the ext into the config module
+* ideally, shouldn't need the security ext at all. it doesn't do anything useful
+* migrate tests from flask-security

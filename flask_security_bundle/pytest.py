@@ -1,5 +1,7 @@
+import json
 import pytest
 
+from flask_api_bundle.pytest import ApiTestResponse
 from flask_controller_bundle.pytest import (
     HtmlTestClient, HtmlTestResponse, _process_test_client_args)
 from flask_security.signals import (
@@ -40,10 +42,29 @@ class SecurityTestClient(HtmlTestClient):
         return super().open(response.location, follow_redirects=True)
 
 
+class SecurityApiTestClient(SecurityTestClient):
+    def open(self, *args, **kwargs):
+        kwargs['data'] = json.dumps(kwargs.get('data'))
+
+        kwargs.setdefault('headers', {})
+        kwargs['headers']['Content-Type'] = 'application/json'
+        kwargs['headers']['Accept'] = 'application/json'
+
+        return super().open(*args, **kwargs)
+
+
 @pytest.fixture()
 def client(app):
     app.test_client_class = SecurityTestClient
     app.response_class = HtmlTestResponse
+    with app.test_client() as client:
+        yield client
+
+
+@pytest.fixture()
+def api_client(app):
+    app.test_client_class = SecurityApiTestClient
+    app.response_class = ApiTestResponse
     with app.test_client() as client:
         yield client
 

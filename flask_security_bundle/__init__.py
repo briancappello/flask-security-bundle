@@ -7,7 +7,7 @@ from .decorators import (
 )
 from .services import (
     SecurityService, SQLAlchemyUserDatastore, UserManager, RoleManager)
-from .views import SecurityController
+from .views import SecurityController, UserResource
 
 
 class FlaskSecurityBundle(Bundle):

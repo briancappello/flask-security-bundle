@@ -1,2 +1,3 @@
-from flask_security_bundle.models import User, UserRole
+from flask_security_bundle.models import UserRole
 from .role import Role
+from .user import User
