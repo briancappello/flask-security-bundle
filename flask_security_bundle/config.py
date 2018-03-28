@@ -10,6 +10,8 @@ from flask_security.forms import (
     SendConfirmationForm,
     PasswordlessLoginForm,
 )
+from .models import User, Role
+from .services import SQLAlchemyUserDatastore
 
 
 class BaseConfig:
@@ -17,6 +19,7 @@ class BaseConfig:
     # sense, see https://pythonhosted.org/itsdangerous/#the-salt
     SECURITY_PASSWORD_SALT = 'the-security-password-salt'
 
+    SECURITY_DATASTORE = SQLAlchemyUserDatastore(User, Role)
     SECURITY_LOGIN_FORM = LoginForm
     SECURITY_CONFIRM_REGISTER_FORM = ConfirmRegisterForm
     SECURITY_REGISTER_FORM = RegisterForm
