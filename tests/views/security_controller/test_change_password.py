@@ -24,7 +24,7 @@ class TestChangePassword:
                                   new_password_confirm='fail'))
         assert r.status_code == 200
         assert templates[0].template.name == 'security/change_password.html'
-        assert 'Password must be at least 6 characters' in r.html
+        assert 'Password must be at least 8 characters long.' in r.html
 
     def test_new_passwords_match(self, client, templates):
         client.login_user()

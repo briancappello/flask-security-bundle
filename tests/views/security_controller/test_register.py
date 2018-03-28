@@ -14,6 +14,16 @@ class TestRegister:
         assert 'Email not provided' in r.html
         assert 'Password not provided' in r.html
 
+    def test_min_password_length(self, client, templates):
+        r = client.post('security.register', data=dict(
+            email='hello@example.com',
+            password='short',
+            password_confirm='short',
+        ))
+        assert r.status_code == 200
+        assert templates[0].template.name == 'security/register.html'
+        assert 'Password must be at least 8 characters long' in r.html
+
     def test_register_confirmation_required(self, client, templates, outbox):
         r = client.post('security.register', data=dict(
             email='hello@example.com',

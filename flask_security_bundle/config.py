@@ -1,6 +1,7 @@
 from datetime import datetime, timezone
 from flask_security import AnonymousUser
-from flask_security.forms import (
+
+from .forms import (
     LoginForm,
     ConfirmRegisterForm,
     RegisterForm,

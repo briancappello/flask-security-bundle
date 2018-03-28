@@ -66,7 +66,8 @@ class TestResetPassword:
                             data=dict(password='short',
                                       password_confirm='short'))
         assert r.status_code == 200
-        assert 'Password must be at least 6 characters' in r.html
+        msg = 'Password must be at least 8 characters long.'
+        assert msg in r.html
 
         r = client.post(url_for('security.reset_password', token=token),
                         data=dict(password='long enough',
