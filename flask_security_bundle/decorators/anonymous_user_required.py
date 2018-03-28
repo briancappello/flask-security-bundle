@@ -1,6 +1,6 @@
-from flask import abort, flash, redirect, request
+from flask import abort, flash, request
+from flask_controller_bundle import redirect
 from flask_security import current_user
-from flask_security.utils import get_post_action_redirect
 from functools import wraps
 from http import HTTPStatus
 
@@ -20,8 +20,8 @@ def anonymous_user_required(*decorator_args,
                 else:
                     if msg:
                         flash(msg, category)
-                    return redirect(get_post_action_redirect(
-                        'SECURITY_POST_LOGIN_VIEW', redirect_url))
+                    return redirect('SECURITY_POST_LOGIN_VIEW',
+                                    override=redirect_url)
             return fn(*args, **kwargs)
         return decorated
 
