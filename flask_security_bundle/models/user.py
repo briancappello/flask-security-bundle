@@ -11,7 +11,7 @@ class User(db.Model, UserMixin):
         lazy_mapped = True
 
     email = db.Column(db.String(64), unique=True, index=True)
-    _password = db.Column('password', db.String, nullable=True)
+    _password = db.Column('password', db.String)
     active = db.Column(db.Boolean(name='active'), default=False)
     confirmed_at = db.Column(db.DateTime(), nullable=True)
 
