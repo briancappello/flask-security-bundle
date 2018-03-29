@@ -1,6 +1,6 @@
 import pytest
 
-from flask import url_for
+from flask_controller_bundle import url_for
 from flask_security import current_user, AnonymousUser
 
 

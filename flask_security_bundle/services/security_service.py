@@ -1,5 +1,5 @@
 from flask import current_app as app
-from flask_controller_bundle import get_url
+from flask_controller_bundle import url_for
 from flask_security.confirmable import (
     generate_confirmation_token as security_generate_confirmation_token,
 )
@@ -88,7 +88,7 @@ class SecurityService(BaseService):
         confirmation_link, token = None, None
         if self.security.confirmable:
             token = security_generate_confirmation_token(user)
-            confirmation_link = get_url('security.confirm_email',
+            confirmation_link = url_for('security.confirm_email',
                                         token=token, _external=True)
 
         user_registered.send(app._get_current_object(),
@@ -131,7 +131,7 @@ class SecurityService(BaseService):
         :param user: The user to send the instructions to
         """
         token = security_generate_confirmation_token(user)
-        confirmation_link = get_url('security.confirm_email',
+        confirmation_link = url_for('security.confirm_email',
                                     token=token, _external=True)
 
         # FIXME-mail
@@ -173,7 +173,7 @@ class SecurityService(BaseService):
         :param user: The user to send the instructions to
         """
         token = security_generate_reset_password_token(user)
-        reset_link = get_url('SECURITY_RESET_PASSWORD_ENDPOINT',
+        reset_link = url_for('SECURITY_RESET_PASSWORD_ENDPOINT',
                              token=token, _external=True)
 
         if app.config.get('SECURITY_SEND_PASSWORD_RESET_EMAIL'):

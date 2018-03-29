@@ -1,6 +1,6 @@
 import pytest
 
-from flask_controller_bundle import get_url
+from flask_controller_bundle import url_for
 from flask_security import AnonymousUser, current_user
 
 
@@ -24,7 +24,7 @@ class TestHtmlResetPassword:
 
         r = client.get('security.reset_password', token=token)
         assert r.status_code == 302
-        assert r.path == get_url('security.forgot_password')
+        assert r.path == url_for('security.forgot_password')
 
         assert len(outbox) == 2
         # first email is for the valid reset request
@@ -49,7 +49,7 @@ class TestHtmlResetPassword:
     def test_token_invalid(self, client, templates):
         r = client.get('security.reset_password', token='fail')
         assert r.status_code == 302
-        assert r.path == get_url('security.forgot_password')
+        assert r.path == url_for('security.forgot_password')
         r = client.follow_redirects(r)
         assert r.status_code == 200
         assert templates[0].template.name == 'security/forgot_password.html'
@@ -127,7 +127,7 @@ class TestApiResetPassword:
         r = api_client.get('security_api.reset_password',
                            token=token)
         assert r.status_code == 302
-        assert r.path == get_url(
+        assert r.path == url_for(
             'SECURITY_API_RESET_PASSWORD_HTTP_GET_REDIRECT', token=token)
 
     @pytest.mark.options(SECURITY_RESET_PASSWORD_WITHIN='-1 seconds')
@@ -140,7 +140,7 @@ class TestApiResetPassword:
         r = api_client.get('security_api.reset_password',
                            token=token)
         assert r.status_code == 302
-        assert r.path == get_url('SECURITY_EXPIRED_RESET_TOKEN_REDIRECT')
+        assert r.path == url_for('SECURITY_EXPIRED_RESET_TOKEN_REDIRECT')
 
         assert len(outbox) == len(templates) == 2
         # first email is for the valid reset request
@@ -157,7 +157,7 @@ class TestApiResetPassword:
         r = api_client.get('security_api.reset_password',
                            token='fail')
         assert r.status_code == 302
-        assert r.path == get_url('SECURITY_INVALID_RESET_TOKEN_REDIRECT')
+        assert r.path == url_for('SECURITY_INVALID_RESET_TOKEN_REDIRECT')
 
     def test_submit_errors(self, user, api_client, security_service,
                            password_resets):

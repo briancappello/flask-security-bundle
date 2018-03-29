@@ -1,7 +1,7 @@
 import pytest
 
 from flask import session
-from flask_controller_bundle.utils import get_url
+from flask_controller_bundle import url_for
 from flask_security_bundle.decorators import anonymous_user_required
 from werkzeug.exceptions import Forbidden
 
@@ -53,7 +53,7 @@ class TestAnonymousUserRequired:
 
         r = method()
         assert r.status_code == 302
-        assert r.location == get_url('SECURITY_POST_LOGIN_VIEW')
+        assert r.location == url_for('SECURITY_POST_LOGIN_VIEW')
 
     def test_custom_params(self, client):
         client.login_user()
