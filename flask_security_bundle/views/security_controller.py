@@ -2,6 +2,7 @@ from flask import current_app as app, request
 from flask_controller_bundle import Controller, route
 from flask_security import current_user
 from flask_security.confirmable import confirm_email_token_status
+from flask_security.recoverable import reset_password_token_status
 from flask_security.views import _ctx as security_template_ctx
 from flask_security.utils import get_message
 from flask_unchained import injectable
@@ -155,8 +156,7 @@ class SecurityController(Controller):
            only_if=lambda app: app.config.get('SECURITY_RECOVERABLE'))
     @anonymous_user_required
     def reset_password(self, token):
-        expired, invalid, user = \
-            self.security_service.reset_password_token_status(token)
+        expired, invalid, user = reset_password_token_status(token)
 
         if invalid:
             self.flash(*get_message('INVALID_RESET_PASSWORD_TOKEN'))

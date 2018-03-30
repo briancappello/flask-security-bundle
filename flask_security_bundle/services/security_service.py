@@ -1,11 +1,11 @@
 from flask import current_app as app
 from flask_controller_bundle import url_for
+from flask_mail_bundle import Mail
 from flask_security.confirmable import (
     generate_confirmation_token as security_generate_confirmation_token,
 )
 from flask_security.recoverable import (
     generate_reset_password_token as security_generate_reset_password_token,
-    reset_password_token_status as security_reset_password_token_status,
 )
 from flask_security.signals import (
     confirm_instructions_sent,
@@ -19,7 +19,6 @@ from flask_security.utils import (
     get_message as security_get_message,
     login_user as security_login_user,
     logout_user as security_logout_user,
-    send_mail as security_send_mail,
 )
 from flask_unchained import BaseService, injectable
 
@@ -29,8 +28,10 @@ from ..extensions import Security
 
 class SecurityService(BaseService):
     def __init__(self,
+                 mail: Mail = injectable,
                  security: Security = injectable,
                  user_manager: UserManager = injectable):
+        self.mail = mail
         self.security = security
         self.user_manager = user_manager
 
@@ -95,13 +96,10 @@ class SecurityService(BaseService):
                              user=user, confirm_token=token)
 
         if app.config.get('SECURITY_SEND_REGISTER_EMAIL'):
-            # FIXME-mail
-            security_send_mail(
-                subject=app.config.get('SECURITY_EMAIL_SUBJECT_REGISTER'),
-                recipient=user.email,
-                template='welcome',
-                user=user,
-                confirmation_link=confirmation_link)
+            self.send_mail(
+                app.config.get('SECURITY_EMAIL_SUBJECT_REGISTER'),
+                to=user.email, template='security/email/welcome.html',
+                user=user, confirmation_link=confirmation_link)
 
         if should_login_user:
             return self.login_user(user)
@@ -110,17 +108,22 @@ class SecurityService(BaseService):
     def change_password(self, user, password):
         user.password = password
         self.user_manager.save(user)
-        self.send_password_changed_notice(user)
         password_changed.send(app._get_current_object(), user=user)
+        if app.config.get('SECURITY_SEND_PASSWORD_CHANGE_EMAIL'):
+            self.send_mail(
+                app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE'),
+                to=user.email, template='security/email/change_notice.html',
+                user=user)
 
     def reset_password(self, user, password):
         user.password = password
         self.user_manager.save(user)
-        self.send_password_reset_notice(user)
         password_reset.send(app._get_current_object(), user=user)
-
-    def reset_password_token_status(self, token):
-        return security_reset_password_token_status(token)
+        if app.config.get('SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL'):
+            self.send_mail(
+                app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_NOTICE'),
+                to=user.email, template='security/email/reset_notice.html',
+                user=user)
 
     def send_confirmation_instructions(self, user):
         """
@@ -134,37 +137,14 @@ class SecurityService(BaseService):
         confirmation_link = url_for('security.confirm_email',
                                     token=token, _external=True)
 
-        # FIXME-mail
-        security_send_mail(app.config.get('SECURITY_EMAIL_SUBJECT_CONFIRM'),
-                           user.email, 'confirmation_instructions', user=user,
-                           confirmation_link=confirmation_link)
+        self.send_mail(
+            app.config.get('SECURITY_EMAIL_SUBJECT_CONFIRM'),
+            to=user.email,
+            template='security/email/confirmation_instructions.html',
+            user=user, confirmation_link=confirmation_link)
 
         confirm_instructions_sent.send(app._get_current_object(), user=user,
                                        token=token)
-
-    def send_password_changed_notice(self, user):
-        """
-        Sends the password changed notice email for the specified user.
-
-        :param user: The user to send the notice to
-        """
-        if app.config.get('SECURITY_SEND_PASSWORD_CHANGE_EMAIL'):
-            # FIXME-mail
-            security_send_mail(
-                app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE'),
-                user.email, 'change_notice', user=user)
-
-    def send_password_reset_notice(self, user):
-        """
-        Sends the password reset notice email for the specified user.
-
-        :param user: The user to send the notice to
-        """
-        if app.config.get('SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL'):
-            # FIXME-mail
-            security_send_mail(
-                app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_NOTICE'),
-                user.email, 'reset_notice', user=user)
 
     def send_reset_password_instructions(self, user):
         """
@@ -177,11 +157,11 @@ class SecurityService(BaseService):
                              token=token, _external=True)
 
         if app.config.get('SECURITY_SEND_PASSWORD_RESET_EMAIL'):
-            # FIXME-mail
-            security_send_mail(
-                subject=app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_RESET'),
-                recipient=user.email,
-                template='reset_instructions', user=user, reset_link=reset_link)
+            self.send_mail(
+                app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_RESET'),
+                to=user.email,
+                template='security/email/reset_instructions.html',
+                user=user, reset_link=reset_link)
 
         reset_password_instructions_sent.send(app._get_current_object(),
                                               user=user, token=token)
@@ -195,3 +175,9 @@ class SecurityService(BaseService):
         self.user_manager.save(user)
         user_confirmed.send(app._get_current_object(), user=user)
         return True
+
+    def send_mail(self, subject, to, template, **kwargs):
+        self.mail.send(subject, to, template, **dict(
+            security=self.security,
+            **self.security._run_ctx_processor('mail'),
+            **kwargs))
