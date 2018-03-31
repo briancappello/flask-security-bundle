@@ -153,7 +153,7 @@ class SecurityService(BaseService):
         :param user: The user to send the instructions to
         """
         token = security_generate_reset_password_token(user)
-        reset_link = url_for('SECURITY_RESET_PASSWORD_ENDPOINT',
+        reset_link = url_for('security.reset_password',
                              token=token, _external=True)
 
         if app.config.get('SECURITY_SEND_PASSWORD_RESET_EMAIL'):

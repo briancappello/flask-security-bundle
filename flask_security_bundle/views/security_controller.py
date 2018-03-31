@@ -17,10 +17,12 @@ class SecurityController(Controller):
     def __init__(self, security_service: SecurityService = injectable):
         self.security_service = security_service
 
-    @route(only_if=False)  # require check_auth_token to be explicitly enabled
+    # require check_auth_token to be explicitly enabled
+    @route(endpoint='security.check_auth_token', only_if=False)
     @auth_required()
     def check_auth_token(self):
-        # the auth_required decorator verifies the token and sets current_user
+        # the auth_required decorator verifies the token and sets current_user,
+        # just need to return a success response
         return self.jsonify({'user': current_user})
 
     @route(endpoint='security.login', methods=['GET', 'POST'])
@@ -167,9 +169,10 @@ class SecurityController(Controller):
                 'PASSWORD_RESET_EXPIRED', email=user.email,
                 within=app.config.get('SECURITY_RESET_PASSWORD_WITHIN')))
             return self.redirect('SECURITY_EXPIRED_RESET_TOKEN_REDIRECT')
-        elif request.is_json and request.method == 'GET':
-            return self.redirect(
-                'SECURITY_API_RESET_PASSWORD_HTTP_GET_REDIRECT', token=token)
+
+        spa_redirect = app.config.get('SECURITY_API_RESET_PASSWORD_HTTP_GET_REDIRECT')
+        if request.method == 'GET' and spa_redirect:
+            return self.redirect(spa_redirect, token=token, _external=True)
 
         form = self._get_form('SECURITY_RESET_PASSWORD_FORM')
         if form.validate_on_submit():

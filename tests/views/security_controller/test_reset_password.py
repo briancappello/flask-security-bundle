@@ -113,10 +113,11 @@ class TestApiResetPassword:
         security_service.send_reset_password_instructions(user)
         token = password_resets[0]['token']
         api_client.login_user()
-        r = api_client.post('security_api.reset_password',
-                            token=token)
+        r = api_client.post('security_api.post_reset_password', token=token)
         assert r.status_code == 403
 
+    @pytest.mark.options(
+        SECURITY_API_RESET_PASSWORD_HTTP_GET_REDIRECT='/login/reset/<token>')
     def test_http_get_redirects_to_frontend_form(self, user, api_client,
                                                  security_service,
                                                  password_resets):
@@ -164,14 +165,14 @@ class TestApiResetPassword:
         security_service.send_reset_password_instructions(user)
         token = password_resets[0]['token']
 
-        r = api_client.post('security_api.reset_password',
+        r = api_client.post('security_api.post_reset_password',
                             token=token)
         assert r.status_code == 400
         msg = 'Password not provided'
         assert msg in r.errors['password']
         assert msg in r.errors['password_confirm']
 
-        r = api_client.post('security_api.reset_password',
+        r = api_client.post('security_api.post_reset_password',
                             token=token,
                             data=dict(password='short',
                                       password_confirm='short'))
@@ -179,7 +180,7 @@ class TestApiResetPassword:
         msg = 'Password must be at least 8 characters long.'
         assert msg in r.errors['password']
 
-        r = api_client.post('security_api.reset_password',
+        r = api_client.post('security_api.post_reset_password',
                             token=token,
                             data=dict(password='long enough',
                                       password_confirm='but not the same'))
@@ -191,7 +192,7 @@ class TestApiResetPassword:
         security_service.send_reset_password_instructions(user)
         token = password_resets[0]['token']
 
-        r = api_client.post('security_api.reset_password',
+        r = api_client.post('security_api.post_reset_password',
                             token=token,
                             data=dict(password='new password',
                                       password_confirm='new password'))

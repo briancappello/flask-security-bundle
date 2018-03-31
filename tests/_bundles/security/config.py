@@ -1,0 +1,8 @@
+class TestConfig:
+    TESTING = True
+
+    SECURITY_PASSWORD_SALT = 'not-secret-salt'
+    SECURITY_REGISTERABLE = True
+    SECURITY_CONFIRMABLE = True
+    SECURITY_RECOVERABLE = True
+    SECURITY_CHANGEABLE = True

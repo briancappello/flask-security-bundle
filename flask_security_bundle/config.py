@@ -56,8 +56,8 @@ class BaseConfig:
     SECURITY_POST_RESET_VIEW = None
     SECURITY_POST_CHANGE_VIEW = None
 
-    SECURITY_RESET_PASSWORD_ENDPOINT = 'security.reset_password'
-    SECURITY_API_RESET_PASSWORD_HTTP_GET_REDIRECT = 'security.reset_password'
+    SECURITY_FORGOT_PASSWORD_ENDPOINT = 'security.forgot_password'
+    SECURITY_API_RESET_PASSWORD_HTTP_GET_REDIRECT = None
     SECURITY_INVALID_RESET_TOKEN_REDIRECT = 'security.forgot_password'
     SECURITY_EXPIRED_RESET_TOKEN_REDIRECT = 'security.forgot_password'
 

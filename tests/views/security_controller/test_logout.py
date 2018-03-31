@@ -18,9 +18,3 @@ class TestLogout:
         r = api_client.get('security_api.logout')
         assert r.status_code == 204
         assert isinstance(current_user._get_current_object(), AnonymousUser)
-
-    def test_api_post(self, api_client):
-        api_client.login_user()
-        r = api_client.post('security_api.logout')
-        assert r.status_code == 204
-        assert isinstance(current_user._get_current_object(), AnonymousUser)
