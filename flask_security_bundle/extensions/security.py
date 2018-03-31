@@ -16,16 +16,15 @@ from types import FunctionType
 from ..services._datastore_adapter import DatastoreAdapter
 
 
-class Security(metaclass=ConfigPropertyMeta):
+class _SecurityConfigProperties(metaclass=ConfigPropertyMeta):
+    __config_prefix__ = 'SECURITY'
+
     changeable: bool = ConfigProperty()
     confirmable: bool = ConfigProperty()
     login_without_confirmation: bool = ConfigProperty()
     recoverable: bool = ConfigProperty()
     registerable: bool = ConfigProperty()
     trackable: bool = ConfigProperty()
-
-    # FIXME-mail
-    email_sender: str = ConfigProperty()
 
     token_authentication_header: str = ConfigProperty()
     token_authentication_key: str = ConfigProperty()
@@ -38,6 +37,8 @@ class Security(metaclass=ConfigPropertyMeta):
     _unauthorized_callback: FunctionType = \
         ConfigProperty('SECURITY_UNAUTHORIZED_CALLBACK')
 
+
+class Security(_SecurityConfigProperties):
     def __init__(self):
         self._context_processors = {}
         self._send_mail_task = None
@@ -70,8 +71,7 @@ class Security(metaclass=ConfigPropertyMeta):
         self.remember_token_serializer = _get_serializer(app, 'remember')
         self.reset_serializer = _get_serializer(app, 'reset')
 
-        # FIXME-mail: register a custom mail task using the mail service!
-        # self._send_mail_task = send_mail_async
+        self.context_processor(lambda: dict(security=_SecurityConfigProperties()))
 
         identity_loaded.connect_via(app)(_on_identity_loaded)
         app.extensions['security'] = self

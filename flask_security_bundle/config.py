@@ -66,7 +66,6 @@ class BaseConfig:
     SECURITY_SEND_PASSWORD_RESET_EMAIL = True
     SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL = True
 
-    # FIXME-mail
     SECURITY_EMAIL_SUBJECT_REGISTER = 'Welcome'
     SECURITY_EMAIL_SUBJECT_CONFIRM = 'Please confirm your email'
     SECURITY_EMAIL_SUBJECT_PASSWORDLESS = 'Login instructions'
@@ -74,13 +73,6 @@ class BaseConfig:
     SECURITY_EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE = \
         'Your password has been changed'
     SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = 'Password reset instructions'
-    SECURITY_EMAIL_SENDER = LocalProxy(lambda: current_app.config.get(
-        'MAIL_DEFAULT_SENDER', 'no-reply@localhost'))
-
-    SECURITY_EMAIL_HTML = True
-    # disable flask-security's use of .txt templates (instead we
-    # generate the plain text from the html message)
-    SECURITY_EMAIL_PLAINTEXT = False
 
     # make datetimes timezone-aware by default
     SECURITY_DATETIME_FACTORY = lambda: datetime.now(timezone.utc)
