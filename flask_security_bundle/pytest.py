@@ -1,14 +1,17 @@
 import json
 import pytest
 
-from flask_api_bundle.pytest import ApiTestResponse
-from flask_controller_bundle.pytest import (
-    HtmlTestClient, HtmlTestResponse, _process_test_client_args)
-from flask_security.signals import (
-    reset_password_instructions_sent,
-    user_confirmed,
-    user_registered,
-)
+try:
+    from flask_api_bundle.pytest import ApiTestResponse
+except (ImportError, ModuleNotFoundError):
+    pass
+
+from flask_controller_bundle.pytest import (HtmlTestClient, HtmlTestResponse,
+                                            _process_test_client_args)
+from flask_security.signals import (reset_password_instructions_sent,
+                                    user_confirmed, user_registered)
+from flask_unchained.pytest import optional_pytest_fixture
+
 
 class SecurityTestClient(HtmlTestClient):
     token = None
@@ -61,7 +64,7 @@ def client(app):
         yield client
 
 
-@pytest.fixture()
+@optional_pytest_fixture('flask_api_bundle')
 def api_client(app):
     app.test_client_class = SecurityApiTestClient
     app.response_class = ApiTestResponse

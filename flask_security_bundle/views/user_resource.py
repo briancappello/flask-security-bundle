@@ -1,4 +1,8 @@
-from flask_api_bundle import ModelResource
+try:
+    from flask_api_bundle import ma
+except ImportError:
+    from flask_unchained import OptionalClass as ma
+
 from flask_controller_bundle.constants import CREATE, GET, PATCH
 from flask_unchained import injectable
 
@@ -6,7 +10,7 @@ from ..decorators import anonymous_user_required, auth_required_same_user
 from ..services import SecurityService
 
 
-class UserResource(ModelResource):
+class UserResource(ma.ModelResource):
     model = 'User'
 
     include_methods = {CREATE, GET, PATCH}

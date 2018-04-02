@@ -1,4 +1,8 @@
-from flask_api_bundle import ma
+try:
+    from flask_api_bundle import ma
+except ImportError:
+    from flask_unchained import OptionalClass as ma
+
 from flask_unchained import injectable
 
 from ..services import UserManager
@@ -30,4 +34,3 @@ class UserSerializer(ma.ModelSerializer):
         if not value or len(value) < min_len:
             msg = f'Password must be at least {min_len} characters long.'
             raise ma.ValidationError(msg)
-
