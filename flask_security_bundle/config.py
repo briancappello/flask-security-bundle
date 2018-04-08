@@ -1,8 +1,7 @@
 from datetime import datetime, timezone
-from flask import abort, current_app
+from flask import abort
 from flask_security import AnonymousUser
 from http import HTTPStatus
-from werkzeug.local import LocalProxy
 
 from .forms import (
     LoginForm,
@@ -16,7 +15,7 @@ from .forms import (
 )
 
 
-class BaseConfig:
+class Config:
     SECURITY_CONFIRMABLE = False
     SECURITY_REGISTERABLE = False
     SECURITY_RECOVERABLE = False
@@ -92,7 +91,7 @@ class BaseConfig:
     SECURITY_DEPRECATED_HASHING_SCHEMES = []
 
 
-class TestConfig(BaseConfig):
+class TestConfig:
     TESTING = True
     WTF_CSRF_ENABLED = False
     SECURITY_PASSWORD_HASH_OPTIONS = dict(bcrypt={'rounds': 4})

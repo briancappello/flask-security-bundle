@@ -1,5 +1,5 @@
 from flask_unchained import AppConfig
 
 
-class BaseConfig(AppConfig):
+class Config(AppConfig):
     SECRET_KEY = 'not-secret-key'
