@@ -1,0 +1,5 @@
+include CHANGELOG.md LICENSE README.md requirements.txt setup.cfg tox.ini
+include *.py
+recursive-include tests *.py
+recursive-include tests *.html
+recursive-include flask_security_bundle *.html
