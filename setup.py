@@ -27,6 +27,7 @@ setup(
     install_requires=[
         'bcrypt>=3.1.3',
         'flask-controller-bundle>=0.2.0',
+        'flask-mail-bundle>=0.2.0',
         'flask-security>=3.0.0',
         'flask-sqlalchemy-bundle>=0.2.0',
         'flask-unchained>=0.2.0',
