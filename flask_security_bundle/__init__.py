@@ -11,6 +11,7 @@
 __version__ = '0.1.1'
 
 
+from flask_security import current_user
 from flask_unchained import Bundle
 
 from .decorators import (
