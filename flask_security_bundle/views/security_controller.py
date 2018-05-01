@@ -201,8 +201,9 @@ class SecurityController(Controller):
         form = self._get_form('SECURITY_CHANGE_PASSWORD_FORM')
 
         if form.validate_on_submit():
-            self.security_service.change_password(current_user,
-                                                  form.new_password.data)
+            self.security_service.change_password(
+                current_user._get_current_object(),
+                form.new_password.data)
             self.after_this_request(self._commit)
             self.flash(*get_message('PASSWORD_CHANGE'))
             if request.is_json:
