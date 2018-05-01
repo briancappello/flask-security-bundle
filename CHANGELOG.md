@@ -1,6 +1,8 @@
 # CHANGELOG
 
-## 0.1.2 (unreleased)
+## 0.1.3 (unreleased)
+
+## 0.1.2 (2018/05/01)
 
 * alias `current_user` to the flask_security_bundle package
 * fix emailing upon `change_password` action
