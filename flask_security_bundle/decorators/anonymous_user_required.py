@@ -1,5 +1,5 @@
 from flask import abort, flash, request
-from flask_controller_bundle import redirect
+from flask_unchained import redirect
 from flask_security import current_user
 from functools import wraps
 from http import HTTPStatus

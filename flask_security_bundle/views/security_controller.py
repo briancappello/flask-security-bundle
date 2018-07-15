@@ -1,5 +1,5 @@
 from flask import current_app as app, request
-from flask_controller_bundle import Controller, route
+from flask_unchained import Controller, route
 from flask_security import current_user
 from flask_security.confirmable import confirm_email_token_status
 from flask_security.recoverable import reset_password_token_status
@@ -69,7 +69,6 @@ class SecurityController(Controller):
         if form.validate_on_submit():
             user = self.security_service.user_manager.create(**form.to_dict())
             self.security_service.register_user(user)
-
             return self.redirect('SECURITY_POST_REGISTER_VIEW')
 
         return self.render('register',

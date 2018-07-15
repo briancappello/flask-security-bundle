@@ -1,4 +1,4 @@
-from flask_controller_bundle import Controller, route
+from flask_unchained import Controller, route
 
 
 class SiteController(Controller):

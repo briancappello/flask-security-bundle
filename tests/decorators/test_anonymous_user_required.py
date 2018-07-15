@@ -1,7 +1,7 @@
 import pytest
 
 from flask import session
-from flask_controller_bundle import url_for
+from flask_unchained import url_for
 from flask_security_bundle.decorators import anonymous_user_required
 from werkzeug.exceptions import Forbidden
 

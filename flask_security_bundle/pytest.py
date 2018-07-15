@@ -6,7 +6,7 @@ try:
 except (ImportError, ModuleNotFoundError):
     pass
 
-from flask_controller_bundle.pytest import (HtmlTestClient, HtmlTestResponse,
+from flask_unchained.pytest import (HtmlTestClient, HtmlTestResponse,
                                             _process_test_client_args)
 from flask_security.signals import (reset_password_instructions_sent,
                                     user_confirmed, user_registered)

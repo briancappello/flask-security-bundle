@@ -3,8 +3,7 @@ try:
 except ImportError:
     from flask_unchained import OptionalClass as ModelResource
 
-from flask_controller_bundle.constants import CREATE, GET, PATCH
-from flask_unchained import injectable
+from flask_unchained import CREATE, GET, PATCH, injectable
 
 from ..decorators import anonymous_user_required, auth_required_same_user
 from ..services import SecurityService

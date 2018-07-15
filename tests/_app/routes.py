@@ -1,4 +1,4 @@
-from flask_controller_bundle import controller, get, post, prefix, resource
+from flask_unchained import controller, get, post, prefix, resource
 from flask_security_bundle import SecurityController, UserResource
 
 from .views import SiteController
