@@ -63,7 +63,7 @@ class TestHtmlResetPassword:
         r = client.post('security.reset_password', token=token)
         assert r.status_code == 200
         assert templates[1].template.name == 'security/reset_password.html'
-        assert r.html.count('Password not provided') == 2
+        assert r.html.count('Password is required') == 2
 
         r = client.post('security.reset_password', token=token,
                         data=dict(password='short',
@@ -168,7 +168,7 @@ class TestApiResetPassword:
         r = api_client.post('security_api.post_reset_password',
                             token=token)
         assert r.status_code == 400
-        msg = 'Password not provided'
+        msg = 'Password is required'
         assert msg in r.errors['password']
         assert msg in r.errors['password_confirm']
 

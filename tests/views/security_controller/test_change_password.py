@@ -14,7 +14,7 @@ class TestHtmlChangePassword:
         r = client.post('security.change_password')
         assert r.status_code == 200
         assert templates[0].template.name == 'security/change_password.html'
-        assert r.html.count('Password not provided') == 3
+        assert r.html.count('Password is required') == 3
 
     def test_min_length(self, client, templates):
         client.login_user()

@@ -10,8 +10,10 @@ class User(db.Model, UserMixin):
     class Meta:
         lazy_mapped = True
 
-    email = db.Column(db.String(64), unique=True, index=True)
-    _password = db.Column('password', db.String)
+    email = db.Column(db.String(64), unique=True, index=True, info=dict(required=True))
+    _password = db.Column('password', db.String, info=dict(
+        required=True,
+    ))
     active = db.Column(db.Boolean(name='active'), default=False)
     confirmed_at = db.Column(db.DateTime(), nullable=True)
 
@@ -29,3 +31,10 @@ class User(db.Model, UserMixin):
     @password.setter
     def password(self, password):
         self._password = security_hash_password(password)
+
+    @classmethod
+    def validate_password(cls, password):
+        min_len = 8
+        if not password or len(password) < min_len:
+            msg = f'Password must be at least {min_len} characters long.'
+            raise db.ValidationError(msg)
