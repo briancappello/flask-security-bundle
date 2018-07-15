@@ -16,6 +16,8 @@ from .forms import (
 
 
 class Config:
+    SECRET_KEY = 'change_me_not_secret_key'
+
     SECURITY_CONFIRMABLE = False
     SECURITY_REGISTERABLE = False
     SECURITY_RECOVERABLE = False
