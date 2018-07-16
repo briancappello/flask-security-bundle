@@ -96,4 +96,4 @@ class Config:
 class TestConfig:
     TESTING = True
     WTF_CSRF_ENABLED = False
-    SECURITY_PASSWORD_HASH_OPTIONS = dict(bcrypt={'rounds': 4})
+    SECURITY_PASSWORD_HASH = 'plaintext'
