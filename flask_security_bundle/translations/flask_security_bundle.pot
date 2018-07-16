@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-07-15 17:21-0600\n"
+"POT-Creation-Date: 2018-07-16 12:48-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -16,6 +16,14 @@ msgstr ""
 "Content-Type: text/plain; charset=utf-8\n"
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
+
+#: flask_security_bundle/models/user.py:14
+msgid "flask_security_bundle.email_required"
+msgstr ""
+
+#: flask_security_bundle/models/user.py:16
+msgid "flask_security_bundle.password_required"
+msgstr ""
 
 #: flask_security_bundle/templates/security/change_password.html:5
 msgid "flask_security_bundle.change_password"

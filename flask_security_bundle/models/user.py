@@ -1,8 +1,7 @@
 from flask_security import UserMixin
 from flask_security.utils import hash_password as security_hash_password
-
 from flask_sqlalchemy_bundle import db
-
+from flask_unchained import lazy_gettext as _
 from .user_role import UserRole
 
 
@@ -10,10 +9,10 @@ class User(db.Model, UserMixin):
     class Meta:
         lazy_mapped = True
 
-    email = db.Column(db.String(64), unique=True, index=True, info=dict(required=True))
+    email = db.Column(db.String(64), unique=True, index=True, info=dict(
+        required=_('flask_security_bundle.email_required')))
     _password = db.Column('password', db.String, info=dict(
-        required=True,
-    ))
+        required=_('flask_security_bundle.password_required')))
     active = db.Column(db.Boolean(name='active'), default=False)
     confirmed_at = db.Column(db.DateTime(), nullable=True)
 
