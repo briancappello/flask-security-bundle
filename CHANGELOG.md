@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.2.0 (unreleased)
+## 0.2.0 (2018/07/16)
 
 * upgrade to flask-unchained >= 0.3.1
 * upgrade to flask-sqlalchemy-bundle >= 0.3.1
