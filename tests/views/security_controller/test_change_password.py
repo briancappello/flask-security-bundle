@@ -14,7 +14,7 @@ class TestHtmlChangePassword:
         r = client.post('security.change_password')
         assert r.status_code == 200
         assert templates[0].template.name == 'security/change_password.html'
-        assert r.html.count('Password is required') == 3
+        assert r.html.count('Password is required.') == 3, r.html
 
     def test_min_length(self, client, templates):
         client.login_user()
@@ -34,7 +34,7 @@ class TestHtmlChangePassword:
                                   new_password_confirm='but no match'))
         assert r.status_code == 200
         assert templates[0].template.name == 'security/change_password.html'
-        assert 'Passwords do not match' in r.html
+        assert 'Passwords do not match.' in r.html, r.html
 
     def test_new_same_as_the_old(self, client, templates):
         client.login_user()
@@ -44,7 +44,7 @@ class TestHtmlChangePassword:
                                   new_password_confirm='password'))
         assert r.status_code == 200
         assert templates[0].template.name == 'security/change_password.html'
-        assert 'Your new password must be different than your previous password' in r.html
+        assert 'Your new password must be different than your previous password.' in r.html
 
     def test_valid_new_password(self, client, user):
         client.login_user()
@@ -90,7 +90,7 @@ class TestApiChangePassword:
                                       new_password='long enough',
                                       new_password_confirm='but no match'))
         assert 'new_password_confirm' in r.errors
-        assert 'Passwords do not match' in r.errors['new_password_confirm']
+        assert 'Passwords do not match.' in r.errors['new_password_confirm']
 
     def test_new_same_as_the_old(self, api_client):
         api_client.login_user()

@@ -2,7 +2,9 @@ from flask_security import UserMixin
 from flask_security.utils import hash_password as security_hash_password
 from flask_sqlalchemy_bundle import db
 from flask_unchained import lazy_gettext as _
+
 from .user_role import UserRole
+from ..validators import EmailValidator
 
 
 class User(db.Model, UserMixin):
@@ -10,7 +12,8 @@ class User(db.Model, UserMixin):
         lazy_mapped = True
 
     email = db.Column(db.String(64), unique=True, index=True, info=dict(
-        required=_('flask_security_bundle.email_required')))
+        required=_('flask_security_bundle.email_required'),
+        validators=[EmailValidator]))
     _password = db.Column('password', db.String, info=dict(
         required=_('flask_security_bundle.password_required')))
     active = db.Column(db.Boolean(name='active'), default=False)

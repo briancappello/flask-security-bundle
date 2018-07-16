@@ -7,7 +7,7 @@ class TestHtmlForgotPassword:
         r = client.post('security.forgot_password')
         assert r.status_code == 200
         assert templates[0].template.name == 'security/forgot_password.html'
-        assert 'Email not provided' in r.html
+        assert 'Email is required.' in r.html, r.html
 
     def test_valid_email_required(self, client, templates):
         r = client.post('security.forgot_password',
@@ -46,14 +46,14 @@ class TestApiForgotPassword:
     def test_email_required(self, api_client):
         r = api_client.post('security_api.forgot_password')
         assert r.status_code == 400
-        assert 'Email not provided' in r.errors['email']
+        assert 'Email is required.' in r.errors['email']
 
     def test_valid_email_required(self, api_client):
         r = api_client.post('security_api.forgot_password',
                             data=dict(email='fail'))
         assert r.status_code == 400
-        assert 'Invalid email address' in r.errors['email']
-        assert 'Specified user does not exist' in r.errors['email']
+        assert 'Invalid email address.' in r.errors['email']
+        assert 'Specified user does not exist.' in r.errors['email']
 
     def test_anonymous_user_required(self, api_client):
         api_client.login_user()

@@ -12,11 +12,13 @@ class TestRegister:
         assert templates[0].template.name == 'security/register.html'
 
     def test_errors(self, client, templates):
-        r = client.post('security.register')
+        r = client.post('security.register', data=dict(
+            email='!@#!.com',
+        ))
         assert r.status_code == 200
         assert templates[0].template.name == 'security/register.html'
-        assert 'Email not provided' in r.html
-        assert 'Password is required' in r.html
+        assert 'Invalid email address.' in r.html
+        assert 'Password is required.' in r.html, r.html
 
     def test_min_password_length(self, client, templates):
         r = client.post('security.register', data=dict(

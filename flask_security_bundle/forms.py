@@ -1,27 +1,39 @@
+import inspect
+
 from flask import current_app as app, request
 from flask_security import current_user
 from flask_security.forms import (
     EqualTo,
-    ForgotPasswordForm,
-    Length,
+    Field,
     NextFormMixin,
-    PasswordlessLoginForm,
-    RegisterFormMixin,
-    Required,
-    SendConfirmationForm,
+    StringField,
     SubmitField,
-    UniqueEmailFormMixin,
-    get_form_field_label,
-    email_required,
-    email_validator,
+    _datastore,
 )
-from flask_security.utils import get_message
 from flask_sqlalchemy_bundle import ModelForm
-from flask_unchained import unchained, injectable
-from wtforms import fields
+from flask_unchained import unchained, injectable, lazy_gettext as _
+from wtforms import ValidationError, fields
 
 from .services import SecurityService
 from .utils import verify_and_update_password
+
+
+password_equal = EqualTo(
+    'password', message=_('flask_security_bundle.error.retype_password_mismatch'))
+new_password_equal = EqualTo(
+    'new_password', message=_('flask_security_bundle.error.retype_password_mismatch'))
+
+
+def unique_user_email(form, field):
+    if _datastore.get_user(field.data) is not None:
+        msg = _('flask_security_bundle.error.email_already_associated', email=field.data)
+        raise ValidationError(msg)
+
+
+def valid_user_email(form, field):
+    form.user = _datastore.get_user(field.data)
+    if form.user is None:
+        raise ValidationError(_('flask_security_bundle.error.user_does_not_exist'))
 
 
 class BaseForm(ModelForm):
@@ -31,22 +43,16 @@ class BaseForm(ModelForm):
         super().__init__(*args, **kwargs)
 
 
-password_length = Length(min=8, max=255,
-                         message='Password must be at least 8 characters long.')
-password_required = Required(message='Password is required')
-
-
 @unchained.inject('security_service')
 class LoginForm(BaseForm, NextFormMixin):
     """The default login form"""
     class Meta:
         model = 'User'
 
-    email = fields.StringField(get_form_field_label('email'),
-                               validators=[email_required, email_validator])
-    password = fields.PasswordField(get_form_field_label('password'))
-    remember = fields.BooleanField(get_form_field_label('remember_me'))
-    submit = fields.SubmitField(get_form_field_label('login'))
+    email = fields.StringField(_('flask_security_bundle.form_field.email'))
+    password = fields.PasswordField(_('flask_security_bundle.form_field.password'))
+    remember = fields.BooleanField(_('flask_security_bundle.form_field.remember_me'))
+    submit = fields.SubmitField(_('flask_security_bundle.form_submit.login'))
 
     def __init__(self, *args, security_service: SecurityService = injectable,
                  **kwargs):
@@ -68,69 +74,116 @@ class LoginForm(BaseForm, NextFormMixin):
         self.user = self.get_user()
 
         if self.user is None:
-            self.email.errors.append(get_message('USER_DOES_NOT_EXIST')[0])
+            self.email.errors.append(
+                _('flask_security_bundle.error.user_does_not_exist'))
             return False
         if not self.user.password:
-            self.password.errors.append(get_message('PASSWORD_NOT_SET')[0])
+            self.password.errors.append(
+                _('flask_security_bundle.error.password_not_set'))
             return False
         if not verify_and_update_password(self.password.data, self.user):
-            self.password.errors.append(get_message('INVALID_PASSWORD')[0])
+            self.password.errors.append(
+                _('flask_security_bundle.error.invalid_password'))
             return False
         if (not self.security_service.security.login_without_confirmation
                 and self.security_service.security.confirmable
                 and self.user.confirmed_at is None):
-            self.email.errors.append(get_message('CONFIRMATION_REQUIRED')[0])
+            self.email.errors.append(
+                _('flask_security_bundle.error.confirmation_required'))
             return False
         if not self.user.is_active:
-            self.email.errors.append(get_message('DISABLED_ACCOUNT')[0])
+            self.email.errors.append(
+                _('flask_security_bundle.error.disabled_account'))
             return False
         return True
 
 
+class PasswordlessLoginForm(BaseForm):
+    class Meta:
+        model = 'User'
+
+    user = None
+    email = StringField(_('flask_security_bundle.form_field.email'),
+                        validators=[valid_user_email])
+    submit = SubmitField(_('flask_security_bundle.form_submit.send_login_link'))
+
+    def __init__(self, *args, **kwargs):
+        super(PasswordlessLoginForm, self).__init__(*args, **kwargs)
+
+    def validate(self):
+        if not super(PasswordlessLoginForm, self).validate():
+            return False
+        if not self.user.is_active:
+            self.email.errors.append(
+                _('flask_security_bundle.error.disabled_account'))
+            return False
+        return True
+
+
+class ForgotPasswordForm(BaseForm):
+    class Meta:
+        model = 'User'
+
+    user = None
+    email = StringField(_('flask_security_bundle.form_field.email'),
+                        validators=[valid_user_email])
+    submit = fields.SubmitField(_('flask_security_bundle.form_submit.recover_password'))
+
+
 class PasswordFormMixin:
-    password = fields.PasswordField(get_form_field_label('password'))
+    password = fields.PasswordField(_('flask_security_bundle.form_field.password'))
 
 
 class PasswordConfirmFormMixin:
     password_confirm = fields.PasswordField(
-        get_form_field_label('retype_password'),
-        validators=[EqualTo('password', message='RETYPE_PASSWORD_MISMATCH')])
+        _('flask_security_bundle.form_field.retype_password'),
+        validators=[password_equal])
 
 
 class ChangePasswordForm(BaseForm, PasswordFormMixin):
     class Meta:
         model = 'User'
-        model_fields = {'new_password': 'password'}
+        model_fields = {'new_password': 'password',
+                        'new_password_confirm': 'password'}
 
-    new_password = fields.PasswordField(get_form_field_label('new_password'))
+    new_password = fields.PasswordField(
+        _('flask_security_bundle.form_field.new_password'))
     new_password_confirm = fields.PasswordField(
-        get_form_field_label('retype_password'),
-        validators=[EqualTo('new_password', message='RETYPE_PASSWORD_MISMATCH'),
-                    password_required]
-    )
+        _('flask_security_bundle.form_field.retype_password'),
+        validators=[new_password_equal])
 
-    submit = fields.SubmitField(get_form_field_label('change_password'))
+    submit = fields.SubmitField(_('flask_security_bundle.form_submit.change_password'))
 
     def validate(self):
         result = super().validate()
 
         if not verify_and_update_password(self.password.data, current_user):
-            self.password.errors.append(get_message('INVALID_PASSWORD')[0])
+            self.password.errors.append(
+                _('flask_security_bundle.error.invalid_password'))
             return False
         if self.password.data == self.new_password.data:
             self.new_password.errors.append(
-                get_message('PASSWORD_IS_THE_SAME')[0])
+                _('flask_security_bundle.error.password_is_the_same'))
             return False
         return result
 
 
-class BaseConfirmRegisterForm(BaseForm, RegisterFormMixin, UniqueEmailFormMixin):
+class ConfirmRegisterForm(BaseForm, PasswordFormMixin):
     class Meta:
         model = 'User'
 
+    email = StringField(_('flask_security_bundle.form_field.email'),
+                        validators=[unique_user_email])
 
-class ConfirmRegisterForm(BaseConfirmRegisterForm, PasswordFormMixin):
-    pass
+    submit = SubmitField(_('flask_security_bundle.form_submit.register'))
+
+    def to_dict(self):
+        def is_field_and_user_attr(member):
+            return isinstance(member, Field) and \
+                hasattr(_datastore.user_model, member.name)
+
+        fields = inspect.getmembers(self, is_field_and_user_attr)
+        return dict((key, value.data) for key, value in fields)
 
 
 class RegisterForm(ConfirmRegisterForm, PasswordConfirmFormMixin, NextFormMixin):
@@ -143,4 +196,28 @@ class ResetPasswordForm(BaseForm, PasswordFormMixin, PasswordConfirmFormMixin):
         model = 'User'
         model_fields = {'password_confirm': 'password'}
 
-    submit = SubmitField(get_form_field_label('reset_password'))
+    submit = SubmitField(_('flask_security_bundle.form_submit.reset_password'))
+
+
+class SendConfirmationForm(BaseForm):
+    class Meta:
+        model = 'User'
+
+    user = None
+    email = StringField(_('flask_security_bundle.form_field.email'),
+                        validators=[valid_user_email])
+    submit = SubmitField(_('flask_security_bundle.form_submit.send_confirmation'))
+
+    def __init__(self, *args, **kwargs):
+        super(SendConfirmationForm, self).__init__(*args, **kwargs)
+        if request.method == 'GET':
+            self.email.data = request.args.get('email', None)
+
+    def validate(self):
+        if not super(SendConfirmationForm, self).validate():
+            return False
+        if self.user.confirmed_at is not None:
+            self.email.errors.append(
+                _('flask_security_bundle.error.already_confirmed'))
+            return False
+        return True

@@ -8,7 +8,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-07-16 12:48-0600\n"
+"POT-Creation-Date: 2018-07-16 14:56-0600\n"
 "PO-Revision-Date: YEAR-MO-DA HO:MI+ZONE\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language-Team: LANGUAGE <LL@li.org>\n"
@@ -17,11 +17,101 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
 
-#: flask_security_bundle/models/user.py:14
+#: flask_security_bundle/forms.py:22 flask_security_bundle/forms.py:24
+msgid "flask_security_bundle.error.retype_password_mismatch"
+msgstr ""
+
+#: flask_security_bundle/forms.py:29
+msgid "flask_security_bundle.error.email_already_associated"
+msgstr ""
+
+#: flask_security_bundle/forms.py:36 flask_security_bundle/forms.py:78
+msgid "flask_security_bundle.error.user_does_not_exist"
+msgstr ""
+
+#: flask_security_bundle/forms.py:52 flask_security_bundle/forms.py:106
+#: flask_security_bundle/forms.py:128 flask_security_bundle/forms.py:174
+#: flask_security_bundle/forms.py:206
+msgid "flask_security_bundle.form_field.email"
+msgstr ""
+
+#: flask_security_bundle/forms.py:53 flask_security_bundle/forms.py:134
+msgid "flask_security_bundle.form_field.password"
+msgstr ""
+
+#: flask_security_bundle/forms.py:54
+msgid "flask_security_bundle.form_field.remember_me"
+msgstr ""
+
+#: flask_security_bundle/forms.py:55
+msgid "flask_security_bundle.form_submit.login"
+msgstr ""
+
+#: flask_security_bundle/forms.py:82
+msgid "flask_security_bundle.error.password_not_set"
+msgstr ""
+
+#: flask_security_bundle/forms.py:86 flask_security_bundle/forms.py:161
+msgid "flask_security_bundle.error.invalid_password"
+msgstr ""
+
+#: flask_security_bundle/forms.py:92
+msgid "flask_security_bundle.error.confirmation_required"
+msgstr ""
+
+#: flask_security_bundle/forms.py:96 flask_security_bundle/forms.py:118
+msgid "flask_security_bundle.error.disabled_account"
+msgstr ""
+
+#: flask_security_bundle/forms.py:108
+msgid "flask_security_bundle.form_submit.send_login_link"
+msgstr ""
+
+#: flask_security_bundle/forms.py:130
+msgid "flask_security_bundle.form_submit.recover_password"
+msgstr ""
+
+#: flask_security_bundle/forms.py:139 flask_security_bundle/forms.py:151
+msgid "flask_security_bundle.form_field.retype_password"
+msgstr ""
+
+#: flask_security_bundle/forms.py:149
+msgid "flask_security_bundle.form_field.new_password"
+msgstr ""
+
+#: flask_security_bundle/forms.py:154
+msgid "flask_security_bundle.form_submit.change_password"
+msgstr ""
+
+#: flask_security_bundle/forms.py:165
+msgid "flask_security_bundle.error.password_is_the_same"
+msgstr ""
+
+#: flask_security_bundle/forms.py:177
+msgid "flask_security_bundle.form_submit.register"
+msgstr ""
+
+#: flask_security_bundle/forms.py:198
+msgid "flask_security_bundle.form_submit.reset_password"
+msgstr ""
+
+#: flask_security_bundle/forms.py:208
+msgid "flask_security_bundle.form_submit.send_confirmation"
+msgstr ""
+
+#: flask_security_bundle/forms.py:220
+msgid "flask_security_bundle.error.already_confirmed"
+msgstr ""
+
+#: flask_security_bundle/models/user.py:38
+msgid "flask_security_bundle.email_invalid"
+msgstr ""
+
+#: flask_security_bundle/models/user.py:57
 msgid "flask_security_bundle.email_required"
 msgstr ""
 
-#: flask_security_bundle/models/user.py:16
+#: flask_security_bundle/models/user.py:60
 msgid "flask_security_bundle.password_required"
 msgstr ""
 
