@@ -1,6 +1,7 @@
-{% from "security/_macros.html" import render_field_with_errors, render_field %}
+{% from "security/_macros.html" import form_errors, render_field_with_errors, render_field %}
 
 <form action="{{ url_for('security.login') }}" method="POST" name="login_user_form">
+  {{ form_errors(login_user_form) }}
   {{ login_user_form.hidden_tag() }}
   {{ render_field_with_errors(login_user_form.email) }}
   {{ render_field_with_errors(login_user_form.password) }}

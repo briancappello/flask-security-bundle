@@ -58,6 +58,8 @@ class SecurityService(BaseService):
             identity_attrs = app.config.get('SECURITY_USER_IDENTITY_ATTRIBUTES')
             error = f"Invalid {', '.join(identity_attrs)} and/or password."
         form._errors = {'_error': [error]}
+        for field in form._fields.values():
+            field.errors = None
         return form
 
     def logout_user(self):
