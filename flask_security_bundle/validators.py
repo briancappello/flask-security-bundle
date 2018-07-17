@@ -1,6 +1,7 @@
 import re
 
 from flask_sqlalchemy_bundle import BaseValidator, ValidationError
+from flask_unchained import lazy_gettext as _
 from wtforms.validators import HostnameValidation
 
 
