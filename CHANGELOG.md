@@ -3,6 +3,7 @@
 ## 0.2.1 (unreleased)
 
 * fix missing import statement in validators.py
+* fix inclusion of translation files in the distribution
 
 ## 0.2.0 (2018/07/16)
 
