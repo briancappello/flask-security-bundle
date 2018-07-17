@@ -1,6 +1,6 @@
 # CHANGELOG
 
-## 0.2.1 (unreleased)
+## 0.2.1 (2018/07/17)
 
 * fix missing import statement in validators.py
 * fix inclusion of translation files in the distribution

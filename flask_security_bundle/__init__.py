@@ -8,7 +8,7 @@
     :license: MIT, see LICENSE for more details
 """
 
-__version__ = '0.2.0'
+__version__ = '0.2.1'
 
 
 from flask_security import current_user
