@@ -11,7 +11,6 @@ from .forms import (
     ResetPasswordForm,
     ChangePasswordForm,
     SendConfirmationForm,
-    PasswordlessLoginForm,
 )
 
 
@@ -22,7 +21,6 @@ class Config:
     SECURITY_REGISTERABLE = False
     SECURITY_RECOVERABLE = False
     SECURITY_TRACKABLE = False
-    SECURITY_PASSWORDLESS = False
     SECURITY_CHANGEABLE = False
 
     SECURITY_LOGIN_WITHIN = '1 days'
@@ -45,7 +43,6 @@ class Config:
     SECURITY_RESET_PASSWORD_FORM = ResetPasswordForm
     SECURITY_CHANGE_PASSWORD_FORM = ChangePasswordForm
     SECURITY_SEND_CONFIRMATION_FORM = SendConfirmationForm
-    SECURITY_PASSWORDLESS_LOGIN_FORM = PasswordlessLoginForm
     SECURITY_ANONYMOUS_USER = AnonymousUser
 
     # FIXME these are named rather confusingly

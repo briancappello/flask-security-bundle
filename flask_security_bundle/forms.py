@@ -98,28 +98,6 @@ class LoginForm(BaseForm, NextFormMixin):
         return True
 
 
-class PasswordlessLoginForm(BaseForm):
-    class Meta:
-        model = 'User'
-
-    user = None
-    email = StringField(_('flask_security_bundle.form_field.email'),
-                        validators=[valid_user_email])
-    submit = SubmitField(_('flask_security_bundle.form_submit.send_login_link'))
-
-    def __init__(self, *args, **kwargs):
-        super(PasswordlessLoginForm, self).__init__(*args, **kwargs)
-
-    def validate(self):
-        if not super(PasswordlessLoginForm, self).validate():
-            return False
-        if not self.user.is_active:
-            self.email.errors.append(
-                _('flask_security_bundle.error.disabled_account'))
-            return False
-        return True
-
-
 class ForgotPasswordForm(BaseForm):
     class Meta:
         model = 'User'

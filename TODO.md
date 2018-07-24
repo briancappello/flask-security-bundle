@@ -18,5 +18,3 @@
 * move all utility code that a user might want to customize into services
 
 * test SECURITY_TRACKABLE
-
-* test passwordless login (NOTE: upstream docs say it's experimental and should be used with caution.... maybe it be better to just not use it at all)
