@@ -64,19 +64,8 @@ class Config:
     SECURITY_SEND_PASSWORD_RESET_EMAIL = True
     SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL = True
 
-    SECURITY_EMAIL_SUBJECT_REGISTER = 'Welcome'
-    SECURITY_EMAIL_SUBJECT_CONFIRM = 'Please confirm your email'
-    SECURITY_EMAIL_SUBJECT_PASSWORDLESS = 'Login instructions'
-    SECURITY_EMAIL_SUBJECT_PASSWORD_NOTICE = 'Your password has been reset'
-    SECURITY_EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE = \
-        'Your password has been changed'
-    SECURITY_EMAIL_SUBJECT_PASSWORD_RESET = 'Password reset instructions'
-
     # make datetimes timezone-aware by default
     SECURITY_DATETIME_FACTORY = lambda: datetime.now(timezone.utc)
-
-    # FIXME-i18n
-    SECURITY_I18N_DOMAIN = 'flask_security'
 
     SECURITY_PASSWORD_HASH = 'bcrypt'
     SECURITY_PASSWORD_SINGLE_HASH = False

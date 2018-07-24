@@ -1,9 +1,7 @@
 from flask import Flask
 from flask_principal import identity_loaded
 from flask_security.core import (
-    _default_messages,
     _get_hashing_context,
-    _get_i18n_domain,
     _get_login_manager,
     _get_principal,
     _get_pwd_context,
@@ -47,7 +45,6 @@ class Security(_SecurityConfigProperties):
         self.confirm_serializer = None
         self.datastore = None
         self.hashing_context = None
-        self.i18n_domain = None
         self.login_manager = None
         self.login_serializer = None
         self.principal = None
@@ -56,13 +53,8 @@ class Security(_SecurityConfigProperties):
         self.reset_serializer = None
 
     def init_app(self, app: Flask):
-        # FIXME-i18n
-        for key, value in _default_messages.items():
-            app.config.setdefault('SECURITY_MSG_' + key, value)
-
         self.confirm_serializer = _get_serializer(app, 'confirm')
         self.hashing_context = _get_hashing_context(app)
-        self.i18n_domain = _get_i18n_domain(app)
         self.login_manager = _get_login_manager(
             app, app.config.get('SECURITY_ANONYMOUS_USER'))
         self.login_serializer = _get_serializer(app, 'login')

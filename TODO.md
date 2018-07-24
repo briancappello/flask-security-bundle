@@ -11,10 +11,6 @@
 
 * integrate with flask-dance (for OAuth)
 
-* figure out a better solution to sending emails
-
-* figure out a robust solution to handling i18n in flask-unchained
-
 * move all utility code that a user might want to customize into services
 
 * test SECURITY_TRACKABLE

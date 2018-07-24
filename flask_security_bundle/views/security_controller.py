@@ -1,10 +1,9 @@
 from flask import current_app as app, request
-from flask_unchained import Controller, route
+from flask_unchained import Controller, route, lazy_gettext as _
 from flask_security import current_user
 from flask_security.confirmable import confirm_email_token_status
 from flask_security.recoverable import reset_password_token_status
 from flask_security.views import _ctx as security_template_ctx
-from flask_security.utils import get_message
 from flask_unchained import injectable
 from http import HTTPStatus
 from werkzeug.datastructures import MultiDict
@@ -84,8 +83,8 @@ class SecurityController(Controller):
         form = self._get_form('SECURITY_SEND_CONFIRMATION_FORM')
         if form.validate_on_submit():
             self.security_service.send_confirmation_instructions(form.user)
-            self.flash(*get_message('CONFIRMATION_REQUEST',
-                                    email=form.user.email))
+            self.flash(_('flask_security_bundle.flash.confirmation_request',
+                         email=form.user.email), category='info')
             if request.is_json:
                 return '', HTTPStatus.NO_CONTENT
 
@@ -103,15 +102,17 @@ class SecurityController(Controller):
 
         if not user or invalid:
             invalid = True
-            self.flash(*get_message('INVALID_CONFIRMATION_TOKEN'))
+            self.flash(_('flask_security_bundle.flash.invalid_confirmation_token'),
+                       category='error')
 
         already_confirmed = user is not None and user.confirmed_at is not None
 
         if expired and not already_confirmed:
             self.security_service.send_confirmation_instructions(user)
-            self.flash(*get_message(
-                'CONFIRMATION_EXPIRED', email=user.email,
-                within=app.config.get('SECURITY_CONFIRM_EMAIL_WITHIN')))
+            self.flash(_('flask_security_bundle.flash.confirmation_expired',
+                         email=user.email,
+                         within=app.config.get('SECURITY_CONFIRM_EMAIL_WITHIN')),
+                       category='error')
 
         if invalid or (expired and not already_confirmed):
             return self.redirect('SECURITY_CONFIRM_ERROR_VIEW',
@@ -119,10 +120,11 @@ class SecurityController(Controller):
 
         if self.security_service.confirm_user(user):
             self.after_this_request(self._commit)
-            msg = 'EMAIL_CONFIRMED'
+            self.flash(_('flask_security_bundle.flash.email_confirmed'),
+                       category='success')
         else:
-            msg = 'ALREADY_CONFIRMED'
-        self.flash(*get_message(msg))
+            self.flash(_('flask_security_bundle.flash.already_confirmed'),
+                       category='info')
 
         if user != current_user:
             self.security_service.logout_user()
@@ -140,8 +142,8 @@ class SecurityController(Controller):
 
         if form.validate_on_submit():
             self.security_service.send_reset_password_instructions(form.user)
-            self.flash(*get_message('PASSWORD_RESET_REQUEST',
-                                    email=form.user.email))
+            self.flash(_('flask_security_bundle.flash.password_reset_request',
+                         email=form.user.email), category='info')
             if request.is_json:
                 return '', HTTPStatus.NO_CONTENT
 
@@ -160,13 +162,15 @@ class SecurityController(Controller):
         expired, invalid, user = reset_password_token_status(token)
 
         if invalid:
-            self.flash(*get_message('INVALID_RESET_PASSWORD_TOKEN'))
+            self.flash(_('flask_security_bundle.flash.invalid_reset_password_token'),
+                       category='error')
             return self.redirect('SECURITY_INVALID_RESET_TOKEN_REDIRECT')
         elif expired:
             self.security_service.send_reset_password_instructions(user)
-            self.flash(*get_message(
-                'PASSWORD_RESET_EXPIRED', email=user.email,
-                within=app.config.get('SECURITY_RESET_PASSWORD_WITHIN')))
+            self.flash(_('flask_security_bundle.flash.password_reset_expired',
+                         email=user.email,
+                         within=app.config.get('SECURITY_RESET_PASSWORD_WITHIN')),
+                       category='error')
             return self.redirect('SECURITY_EXPIRED_RESET_TOKEN_REDIRECT')
 
         spa_redirect = app.config.get('SECURITY_API_RESET_PASSWORD_HTTP_GET_REDIRECT')
@@ -178,7 +182,8 @@ class SecurityController(Controller):
             self.security_service.reset_password(user, form.password.data)
             self.security_service.login_user(user)
             self.after_this_request(self._commit)
-            self.flash(*get_message('PASSWORD_RESET'))
+            self.flash(_('flask_security_bundle.flash.password_reset'),
+                       category='success')
             if request.is_json:
                 return self.jsonify({'token': user.get_auth_token(),
                                      'user': user})
@@ -204,7 +209,8 @@ class SecurityController(Controller):
                 current_user._get_current_object(),
                 form.new_password.data)
             self.after_this_request(self._commit)
-            self.flash(*get_message('PASSWORD_CHANGE'))
+            self.flash(_('flask_security_bundle.flash.password_change'),
+                       category='success')
             if request.is_json:
                 return self.jsonify({'token': current_user.get_auth_token()})
             return self.redirect('SECURITY_POST_CHANGE_VIEW',

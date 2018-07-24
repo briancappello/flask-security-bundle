@@ -1,5 +1,5 @@
 from flask import current_app as app
-from flask_unchained import url_for
+from flask_unchained import url_for, lazy_gettext as _
 from flask_mail_bundle import Mail
 from flask_security.confirmable import (
     generate_confirmation_token as security_generate_confirmation_token,
@@ -16,7 +16,6 @@ from flask_security.signals import (
     user_registered,
 )
 from flask_security.utils import (
-    get_message as security_get_message,
     login_user as security_login_user,
     logout_user as security_logout_user,
 )
@@ -48,8 +47,8 @@ class SecurityService(BaseService):
         try not to leak excess account info without being too unfriendly to
         actually-valid-users
         """
-        account_disabled = security_get_message('DISABLED_ACCOUNT')[0]
-        confirmation_required = security_get_message('CONFIRMATION_REQUIRED')[0]
+        account_disabled = _('flask_security_bundle.error.disabled_account')
+        confirmation_required = _('flask_security_bundle.error.confirmation_required')
         if account_disabled in form.errors.get('email', []):
             error = account_disabled
         elif confirmation_required in form.errors.get('email', []):
@@ -57,6 +56,8 @@ class SecurityService(BaseService):
         else:
             identity_attrs = app.config.get('SECURITY_USER_IDENTITY_ATTRIBUTES')
             error = f"Invalid {', '.join(identity_attrs)} and/or password."
+
+        # wipe out all individual field errors, we just want a single form-level error
         form._errors = {'_error': [error]}
         for field in form._fields.values():
             field.errors = None
@@ -98,10 +99,11 @@ class SecurityService(BaseService):
                              user=user, confirm_token=token)
 
         if app.config.get('SECURITY_SEND_REGISTER_EMAIL'):
-            self.send_mail(
-                app.config.get('SECURITY_EMAIL_SUBJECT_REGISTER'),
-                to=user.email, template='security/email/welcome.html',
-                user=user, confirmation_link=confirmation_link)
+            self.send_mail(_('flask_security_bundle.email_subject.register'),
+                           to=user.email,
+                           template='security/email/welcome.html',
+                           user=user,
+                           confirmation_link=confirmation_link)
 
         if should_login_user:
             return self.login_user(user)
@@ -112,20 +114,20 @@ class SecurityService(BaseService):
         self.user_manager.save(user)
         password_changed.send(app._get_current_object(), user=user)
         if app.config.get('SECURITY_SEND_PASSWORD_CHANGE_EMAIL'):
-            self.send_mail(
-                app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_CHANGE_NOTICE'),
-                to=user.email, template='security/email/change_notice.html',
-                user=user)
+            self.send_mail(_('flask_security_bundle.email_subject.password_change_notice'),
+                           to=user.email,
+                           template='security/email/change_notice.html',
+                           user=user)
 
     def reset_password(self, user, password):
         user.password = password
         self.user_manager.save(user)
         password_reset.send(app._get_current_object(), user=user)
         if app.config.get('SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL'):
-            self.send_mail(
-                app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_NOTICE'),
-                to=user.email, template='security/email/reset_notice.html',
-                user=user)
+            self.send_mail(_('flask_security_bundle.email_subject.password_notice'),
+                           to=user.email,
+                           template='security/email/reset_notice.html',
+                           user=user)
 
     def send_confirmation_instructions(self, user):
         """
@@ -139,11 +141,11 @@ class SecurityService(BaseService):
         confirmation_link = url_for('security.confirm_email',
                                     token=token, _external=True)
 
-        self.send_mail(
-            app.config.get('SECURITY_EMAIL_SUBJECT_CONFIRM'),
-            to=user.email,
-            template='security/email/confirmation_instructions.html',
-            user=user, confirmation_link=confirmation_link)
+        self.send_mail(_('flask_security_bundle.email_subject.confirm'),
+                       to=user.email,
+                       template='security/email/confirmation_instructions.html',
+                       user=user,
+                       confirmation_link=confirmation_link)
 
         confirm_instructions_sent.send(app._get_current_object(), user=user,
                                        token=token)
@@ -159,11 +161,11 @@ class SecurityService(BaseService):
                              token=token, _external=True)
 
         if app.config.get('SECURITY_SEND_PASSWORD_RESET_EMAIL'):
-            self.send_mail(
-                app.config.get('SECURITY_EMAIL_SUBJECT_PASSWORD_RESET'),
-                to=user.email,
-                template='security/email/reset_instructions.html',
-                user=user, reset_link=reset_link)
+            self.send_mail(_('flask_security_bundle.email_subject.password_reset'),
+                           to=user.email,
+                           template='security/email/reset_instructions.html',
+                           user=user,
+                           reset_link=reset_link)
 
         reset_password_instructions_sent.send(app._get_current_object(),
                                               user=user, token=token)
