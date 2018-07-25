@@ -1,5 +1,9 @@
 # CHANGELOG
 
+## 0.3.0 (2018/07/25)
+
+* update to flask unchained 0.5
+
 ## 0.2.1 (2018/07/17)
 
 * fix missing import statement in validators.py

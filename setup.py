@@ -7,7 +7,7 @@ with open('README.md', encoding='utf-8') as f:
 
 setup(
     name='Flask Security Bundle',
-    version='0.2.1',
+    version='0.3.0',
     description='Authentication and authorization support for Flask Unchained',
     long_description=long_description,
     url='https://github.com/briancappello/flask-security-bundle',
