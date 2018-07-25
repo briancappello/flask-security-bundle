@@ -53,7 +53,7 @@ class TestAnonymousUserRequired:
 
         r = method()
         assert r.status_code == 302
-        assert r.location == url_for('SECURITY_POST_LOGIN_VIEW')
+        assert r.location == url_for('SECURITY_POST_LOGIN_REDIRECT_ENDPOINT')
 
     def test_custom_params(self, client):
         client.login_user()

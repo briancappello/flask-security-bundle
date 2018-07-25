@@ -20,7 +20,7 @@ def anonymous_user_required(*decorator_args,
                 else:
                     if msg:
                         flash(msg, category)
-                    return redirect('SECURITY_POST_LOGIN_VIEW',
+                    return redirect('SECURITY_POST_LOGIN_REDIRECT_ENDPOINT',
                                     override=redirect_url)
             return fn(*args, **kwargs)
         return decorated

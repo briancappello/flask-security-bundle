@@ -10,7 +10,7 @@ class TestLogout:
         client.login_user()
         r = client.get('security.logout')
         assert r.status_code == 302
-        assert r.path == url_for('SECURITY_POST_LOGOUT_VIEW')
+        assert r.path == url_for('SECURITY_POST_LOGOUT_REDIRECT_ENDPOINT')
         assert isinstance(current_user._get_current_object(), AnonymousUser)
 
     def test_api_get(self, api_client):

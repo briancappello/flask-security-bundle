@@ -35,7 +35,7 @@ class SecurityController(Controller):
             if request.is_json:
                 return self.jsonify({'token': form.user.get_auth_token(),
                                      'user': form.user})
-            return self.redirect('SECURITY_POST_LOGIN_VIEW')
+            return self.redirect('SECURITY_POST_LOGIN_REDIRECT_ENDPOINT')
 
         elif form.errors:
             form = self.security_service.process_login_errors(form)
@@ -54,7 +54,7 @@ class SecurityController(Controller):
 
         if request.is_json:
             return '', HTTPStatus.NO_CONTENT
-        return self.redirect('SECURITY_POST_LOGOUT_VIEW')
+        return self.redirect('SECURITY_POST_LOGOUT_REDIRECT_ENDPOINT')
 
     @route(endpoint='security.register', methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_REGISTERABLE'))
@@ -68,7 +68,7 @@ class SecurityController(Controller):
         if form.validate_on_submit():
             user = self.security_service.user_manager.create(**form.to_dict())
             self.security_service.register_user(user)
-            return self.redirect('SECURITY_POST_REGISTER_VIEW')
+            return self.redirect('SECURITY_POST_REGISTER_REDIRECT_ENDPOINT')
 
         return self.render('register',
                            register_user_form=form,
@@ -115,7 +115,7 @@ class SecurityController(Controller):
                        category='error')
 
         if invalid or (expired and not already_confirmed):
-            return self.redirect('SECURITY_CONFIRM_ERROR_VIEW',
+            return self.redirect('SECURITY_CONFIRM_ERROR_REDIRECT_ENDPOINT',
                                  'security.send_confirmation')
 
         if self.security_service.confirm_user(user):
@@ -130,8 +130,8 @@ class SecurityController(Controller):
             self.security_service.logout_user()
             self.security_service.login_user(user)
 
-        return self.redirect('SECURITY_POST_CONFIRM_VIEW',
-                             'SECURITY_POST_LOGIN_VIEW')
+        return self.redirect('SECURITY_POST_CONFIRM_REDIRECT_ENDPOINT',
+                             'SECURITY_POST_LOGIN_REDIRECT_ENDPOINT')
 
     @route(endpoint='security.forgot_password', methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_RECOVERABLE'))
@@ -187,8 +187,8 @@ class SecurityController(Controller):
             if request.is_json:
                 return self.jsonify({'token': user.get_auth_token(),
                                      'user': user})
-            return self.redirect('SECURITY_POST_RESET_VIEW',
-                                 'SECURITY_POST_LOGIN_VIEW')
+            return self.redirect('SECURITY_POST_RESET_REDIRECT_ENDPOINT',
+                                 'SECURITY_POST_LOGIN_REDIRECT_ENDPOINT')
 
         elif form.errors and request.is_json:
             return self.errors(form.errors)
@@ -213,8 +213,8 @@ class SecurityController(Controller):
                        category='success')
             if request.is_json:
                 return self.jsonify({'token': current_user.get_auth_token()})
-            return self.redirect('SECURITY_POST_CHANGE_VIEW',
-                                 'SECURITY_POST_LOGIN_VIEW')
+            return self.redirect('SECURITY_POST_CHANGE_REDIRECT_ENDPOINT',
+                                 'SECURITY_POST_LOGIN_REDIRECT_ENDPOINT')
 
         elif form.errors and request.is_json:
             return self.errors(form.errors)
