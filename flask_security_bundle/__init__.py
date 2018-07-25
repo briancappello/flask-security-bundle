@@ -25,4 +25,4 @@ from .views import SecurityController, UserResource
 
 class FlaskSecurityBundle(Bundle):
     blueprint_names = []
-    command_group_names = []
+    command_group_names = ['users', 'roles']

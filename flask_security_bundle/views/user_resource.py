@@ -1,5 +1,5 @@
 try:
-    from flask_api_bundle import ModelResource
+    from flask_unchained.bundles.api import ModelResource
 except ImportError:
     from flask_unchained import OptionalClass as ModelResource
 

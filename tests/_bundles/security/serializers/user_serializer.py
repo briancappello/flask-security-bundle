@@ -1,6 +1,6 @@
 import re
 
-from flask_api_bundle import ma
+from flask_unchained.bundles.api import ma
 from flask_security_bundle.serializers import (
     UserSerializer as BaseUserSerializer)
 

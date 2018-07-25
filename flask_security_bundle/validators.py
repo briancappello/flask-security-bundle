@@ -1,6 +1,6 @@
 import re
 
-from flask_sqlalchemy_bundle import BaseValidator, ValidationError
+from flask_unchained.bundles.sqlalchemy import BaseValidator, ValidationError
 from flask_unchained import lazy_gettext as _
 from wtforms.validators import HostnameValidation
 
@@ -22,9 +22,7 @@ class EmailValidator(BaseValidator):
 
     def __init__(self, message=None):
         super().__init__(message)
-        self.validate_hostname = HostnameValidation(
-            require_tld=True,
-        )
+        self.validate_hostname = HostnameValidation(require_tld=True)
 
     def __call__(self, value):
         super().__call__(value)

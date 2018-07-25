@@ -1,6 +1,6 @@
 from flask_security import UserMixin
 from flask_security.utils import hash_password as security_hash_password
-from flask_sqlalchemy_bundle import db
+from flask_unchained.bundles.sqlalchemy import db
 from flask_unchained import lazy_gettext as _
 
 from .user_role import UserRole

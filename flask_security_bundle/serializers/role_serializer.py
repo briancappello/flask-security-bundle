@@ -1,5 +1,5 @@
 try:
-    from flask_api_bundle import ma
+    from flask_unchained.bundles.api import ma
 except ImportError:
     from flask_unchained import OptionalClass as ma
 

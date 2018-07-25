@@ -2,7 +2,7 @@ import pytest
 
 from flask_security import current_user
 from flask_security_bundle import SecurityService
-from flask_sqlalchemy_bundle import SessionManager
+from flask_unchained.bundles.sqlalchemy import SessionManager
 
 
 class TestHtmlLogin:

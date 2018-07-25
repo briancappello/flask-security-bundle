@@ -1,6 +1,6 @@
 from flask_security.datastore import UserDatastore as BaseDatastore
 from flask_security.utils import get_identity_attributes
-from flask_sqlalchemy_bundle import SessionManager
+from flask_unchained.bundles.sqlalchemy import SessionManager
 
 from .role_manager import RoleManager
 from .user_manager import UserManager

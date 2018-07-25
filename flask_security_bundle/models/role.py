@@ -1,5 +1,5 @@
 from flask_security import RoleMixin
-from flask_sqlalchemy_bundle import db
+from flask_unchained.bundles.sqlalchemy import db
 
 from .user_role import UserRole
 

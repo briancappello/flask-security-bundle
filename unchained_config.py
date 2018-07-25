@@ -1,6 +1,6 @@
 BUNDLES = [
-    'flask_api_bundle',
-    'flask_sqlalchemy_bundle',
-    'flask_mail_bundle',
+    'flask_unchained.bundles.api',
+    'flask_unchained.bundles.sqlalchemy',
+    'flask_unchained.bundles.mail',
     'flask_security_bundle',
 ]

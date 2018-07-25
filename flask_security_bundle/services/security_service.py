@@ -1,6 +1,6 @@
 from flask import current_app as app
 from flask_unchained import url_for, lazy_gettext as _
-from flask_mail_bundle import Mail
+from flask_unchained.bundles.mail import Mail
 from flask_security.confirmable import (
     generate_confirmation_token as security_generate_confirmation_token,
 )

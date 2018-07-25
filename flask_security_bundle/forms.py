@@ -10,7 +10,7 @@ from flask_security.forms import (
     SubmitField,
     _datastore,
 )
-from flask_sqlalchemy_bundle import ModelForm
+from flask_unchained.bundles.sqlalchemy import ModelForm
 from flask_unchained import unchained, injectable, lazy_gettext as _
 from wtforms import ValidationError, fields
 
