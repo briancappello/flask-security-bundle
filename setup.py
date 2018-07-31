@@ -27,7 +27,7 @@ setup(
     install_requires=[
         'bcrypt>=3.1.3',
         'flask-security>=3.0.0',
-        'flask-unchained>=0.5.0',
+        'flask-unchained>=0.5.1',
     ],
     extras_require={
         'dev': [
