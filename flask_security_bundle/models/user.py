@@ -38,6 +38,6 @@ class User(db.Model, UserMixin):
 
     @classmethod
     def validate_password(cls, password):
-        if not password or len(password) < MIN_PASSWORD_LENGTH:
+        if password and len(password) < MIN_PASSWORD_LENGTH:
             raise db.ValidationError(f'Password must be at least '
                                      f'{MIN_PASSWORD_LENGTH} characters long.')

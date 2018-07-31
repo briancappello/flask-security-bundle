@@ -165,8 +165,7 @@ class ConfirmRegisterForm(BaseForm, PasswordFormMixin):
 
 
 class RegisterForm(ConfirmRegisterForm, PasswordConfirmFormMixin, NextFormMixin):
-    class Meta:
-        model = 'User'
+    pass
 
 
 class ResetPasswordForm(BaseForm, PasswordFormMixin, PasswordConfirmFormMixin):

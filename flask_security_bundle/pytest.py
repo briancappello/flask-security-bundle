@@ -30,7 +30,6 @@ class SecurityTestClient(HtmlTestClient):
         self.get('security_controller.logout')
 
     def open(self, *args, **kwargs):
-        args, kwargs = _process_test_client_args(args, kwargs)
         kwargs.setdefault('headers', {})
         if self.token:
             kwargs['headers']['Authentication-Token'] = self.token

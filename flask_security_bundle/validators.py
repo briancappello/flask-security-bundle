@@ -26,6 +26,8 @@ class EmailValidator(BaseValidator):
 
     def __call__(self, value):
         super().__call__(value)
+        if not value:
+            return
 
         message = self.msg
         if message is None:
