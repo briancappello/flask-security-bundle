@@ -17,16 +17,15 @@ class SecurityController(Controller):
         self.security_service = security_service
 
     # require check_auth_token to be explicitly enabled
-    @route(endpoint='security.check_auth_token', only_if=False)
+    @route(only_if=False)
     @auth_required()
     def check_auth_token(self):
         # the auth_required decorator verifies the token and sets current_user,
         # just need to return a success response
         return self.jsonify({'user': current_user})
 
-    @route(endpoint='security.login', methods=['GET', 'POST'])
-    @anonymous_user_required(msg='You are already logged in',
-                             category='success')
+    @route(methods=['GET', 'POST'])
+    @anonymous_user_required(msg='You are already logged in', category='success')
     def login(self):
         form = self._get_form('SECURITY_LOGIN_FORM')
         if form.validate_on_submit():
@@ -47,7 +46,7 @@ class SecurityController(Controller):
                            login_user_form=form,
                            **security_template_ctx('login'))
 
-    @route(endpoint='security.logout')
+    @route()
     def logout(self):
         if current_user.is_authenticated:
             self.security_service.logout_user()
@@ -56,7 +55,7 @@ class SecurityController(Controller):
             return '', HTTPStatus.NO_CONTENT
         return self.redirect('SECURITY_POST_LOGOUT_REDIRECT_ENDPOINT')
 
-    @route(endpoint='security.register', methods=['GET', 'POST'],
+    @route(methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_REGISTERABLE'))
     @anonymous_user_required
     def register(self):
@@ -74,7 +73,7 @@ class SecurityController(Controller):
                            register_user_form=form,
                            **security_template_ctx('register'))
 
-    @route(endpoint='security.send_confirmation', methods=['GET', 'POST'],
+    @route(methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
     def send_confirmation_email(self):
         """
@@ -95,7 +94,7 @@ class SecurityController(Controller):
                            send_confirmation_form=form,
                            **security_template_ctx('send_confirmation'))
 
-    @route('/confirm/<token>', endpoint='security.confirm_email',
+    @route('/confirm/<token>',
            only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
     def confirm_email(self, token):
         expired, invalid, user = confirm_email_token_status(token)
@@ -116,7 +115,7 @@ class SecurityController(Controller):
 
         if invalid or (expired and not already_confirmed):
             return self.redirect('SECURITY_CONFIRM_ERROR_REDIRECT_ENDPOINT',
-                                 'security.send_confirmation')
+                                 'security_controller.send_confirmation_email')
 
         if self.security_service.confirm_user(user):
             self.after_this_request(self._commit)
@@ -133,7 +132,7 @@ class SecurityController(Controller):
         return self.redirect('SECURITY_POST_CONFIRM_REDIRECT_ENDPOINT',
                              'SECURITY_POST_LOGIN_REDIRECT_ENDPOINT')
 
-    @route(endpoint='security.forgot_password', methods=['GET', 'POST'],
+    @route(methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_RECOVERABLE'))
     @anonymous_user_required(msg='You are already logged in',
                              category='success')
@@ -155,7 +154,6 @@ class SecurityController(Controller):
                            **security_template_ctx('forgot_password'))
 
     @route('/reset-password/<token>', methods=['GET', 'POST'],
-           endpoint='security.reset_password',
            only_if=lambda app: app.config.get('SECURITY_RECOVERABLE'))
     @anonymous_user_required
     def reset_password(self, token):
@@ -198,7 +196,7 @@ class SecurityController(Controller):
                            reset_password_token=token,
                            **security_template_ctx('reset_password'))
 
-    @route(endpoint='security.change_password', methods=['GET', 'POST'],
+    @route(methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_CHANGEABLE'))
     @auth_required
     def change_password(self):

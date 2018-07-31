@@ -3,14 +3,14 @@ import pytest
 
 class TestHtmlSendConfirmationEmail:
     def test_email_required(self, client, templates):
-        r = client.post('security.send_confirmation')
+        r = client.post('security_controller.send_confirmation_email')
         assert r.status_code == 200
         assert templates[0].template.name == \
                'security/send_confirmation_email.html'
         assert 'Email is required.' in r.html, r.html
 
     def test_cannot_reconfirm(self, user, client, templates):
-        r = client.post('security.send_confirmation',
+        r = client.post('security_controller.send_confirmation_email',
                         data=dict(email=user.email))
         assert r.status_code == 200
         assert templates[0].template.name == \
@@ -26,7 +26,7 @@ class TestHtmlSendConfirmationEmail:
         assert templates[0].template.name == 'security/email/welcome.html'
 
         # have them request a new confirmation email
-        r = client.post('security.send_confirmation',
+        r = client.post('security_controller.send_confirmation_email',
                         data=dict(email=user.email))
 
         # make sure they get emailed a new confirmation token

@@ -8,7 +8,7 @@ from flask_security import AnonymousUser, current_user
 class TestLogout:
     def test_html_get(self, client):
         client.login_user()
-        r = client.get('security.logout')
+        r = client.get('security_controller.logout')
         assert r.status_code == 302
         assert r.path == url_for('SECURITY_POST_LOGOUT_REDIRECT_ENDPOINT')
         assert isinstance(current_user._get_current_object(), AnonymousUser)

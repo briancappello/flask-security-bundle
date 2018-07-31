@@ -7,12 +7,12 @@ from tests._bundles.security.forms import ConfirmRegisterForm, RegisterForm
                      SECURITY_CONFIRM_REGISTER_FORM=ConfirmRegisterForm)
 class TestRegister:
     def test_get(self, client, templates):
-        r = client.get('security.register')
+        r = client.get('security_controller.register')
         assert r.status_code == 200
         assert templates[0].template.name == 'security/register.html'
 
     def test_errors(self, client, templates):
-        r = client.post('security.register', data=dict(
+        r = client.post('security_controller.register', data=dict(
             email='!@#!.com',
         ))
         assert r.status_code == 200
@@ -21,7 +21,7 @@ class TestRegister:
         assert 'Password is required.' in r.html, r.html
 
     def test_min_password_length(self, client, templates):
-        r = client.post('security.register', data=dict(
+        r = client.post('security_controller.register', data=dict(
             email='hello@example.com',
             password='short',
             password_confirm='short',
@@ -31,7 +31,7 @@ class TestRegister:
         assert 'Password must be at least 8 characters long' in r.html
 
     def test_register_confirmation_required(self, client, templates, outbox):
-        r = client.post('security.register', data=dict(
+        r = client.post('security_controller.register', data=dict(
             username='hello',
             email='hello@example.com',
             password='password',
@@ -47,7 +47,7 @@ class TestRegister:
 
     @pytest.mark.options(SECURITY_CONFIRMABLE=False)
     def test_register(self, client, templates, outbox):
-        r = client.post('security.register', data=dict(
+        r = client.post('security_controller.register', data=dict(
             username='hello',
             email='hello@example.com',
             password='password',

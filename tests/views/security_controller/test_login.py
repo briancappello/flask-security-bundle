@@ -7,12 +7,12 @@ from flask_unchained.bundles.sqlalchemy import SessionManager
 
 class TestHtmlLogin:
     def test_get_login(self, client, templates):
-        r = client.get('security.login')
+        r = client.get('security_controller.login')
         assert r.status_code == 200
         assert templates[0].template.name == 'security/login.html'
 
     def test_login_errors(self, client, templates):
-        r = client.post('security.login')
+        r = client.post('security_controller.login')
         assert templates[0].template.name == 'security/login.html'
         assert 'Invalid email and/or password.' in r.html
         assert 'Email is required.' not in r.html
@@ -20,7 +20,7 @@ class TestHtmlLogin:
 
     @pytest.mark.options(SECURITY_USER_IDENTITY_ATTRIBUTES=['email'])
     def test_login_with_email(self, client, user):
-        r = client.post('security.login', data=dict(email=user.email,
+        r = client.post('security_controller.login', data=dict(email=user.email,
                                                     password='password'))
         assert r.status_code == 302
         assert r.path == '/'
@@ -28,7 +28,7 @@ class TestHtmlLogin:
 
     @pytest.mark.user(active=False)
     def test_active_user_required(self, client, templates, user):
-        r = client.post('security.login', data=dict(email=user.email,
+        r = client.post('security_controller.login', data=dict(email=user.email,
                                                     password='password'))
         assert r.status_code == 200
         assert templates[0].template.name == 'security/login.html'
@@ -39,7 +39,7 @@ class TestHtmlLogin:
 class TestApiLogin:
     def test_token_login(self, api_client, user):
         r = api_client.get(
-            'security.check_auth_token',
+            'security_controller.check_auth_token',
             headers={'Authentication-Token': user.get_auth_token()})
         assert r.status_code == 200
         assert 'user' in r.json

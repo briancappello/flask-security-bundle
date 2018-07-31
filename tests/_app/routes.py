@@ -16,14 +16,10 @@ routes = [
     ]),
     prefix('/api/v1', [
         controller('/auth', SecurityController, rules=[
-            get('/check-auth-token', SecurityController.check_auth_token,
-                only_if=True, endpoint='security.check_auth_token'),
-            post('/login', SecurityController.login,
-                 endpoint='security_api.login'),
-            get('/logout', SecurityController.logout,
-                endpoint='security_api.logout'),
-            post('/send-confirmation-email',
-                 SecurityController.send_confirmation_email,
+            get('/check-auth-token', SecurityController.check_auth_token, only_if=True),
+            post('/login', SecurityController.login, endpoint='security_api.login'),
+            get('/logout', SecurityController.logout, endpoint='security_api.logout'),
+            post('/send-confirmation-email', SecurityController.send_confirmation_email,
                  endpoint='security_api.send_confirmation_email'),
             post('/forgot-password', SecurityController.forgot_password,
                  endpoint='security_api.forgot_password'),

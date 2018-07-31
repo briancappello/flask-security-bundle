@@ -16,7 +16,7 @@ class TestConfirmEmail:
         assert not user.confirmed_at
 
         confirm_token = registrations[0]['confirm_token']
-        r = client.get(url_for('security.confirm_email', token=confirm_token))
+        r = client.get(url_for('security_controller.confirm_email', token=confirm_token))
         assert r.status_code == 302
         assert r.path == '/'
 
@@ -34,9 +34,9 @@ class TestConfirmEmail:
         assert len(registrations) == 1
 
         confirm_token = registrations[0]['confirm_token']
-        r = client.get(url_for('security.confirm_email', token=confirm_token))
+        r = client.get(url_for('security_controller.confirm_email', token=confirm_token))
         assert r.status_code == 302
-        assert r.path == url_for('security.send_confirmation')
+        assert r.path == url_for('security_controller.send_confirmation_email')
 
         assert len(confirmations) == 0
         assert len(outbox) == len(templates) == 2
@@ -54,9 +54,9 @@ class TestConfirmEmail:
         security_service.register_user(user)
         assert len(registrations) == 1
 
-        r = client.get(url_for('security.confirm_email', token='fail'))
+        r = client.get(url_for('security_controller.confirm_email', token='fail'))
         assert r.status_code == 302
-        assert r.path == url_for('security.send_confirmation')
+        assert r.path == url_for('security_controller.send_confirmation_email')
 
         assert len(confirmations) == 0
         assert len(outbox) == len(templates) == 1

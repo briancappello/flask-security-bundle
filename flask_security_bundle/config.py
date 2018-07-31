@@ -54,10 +54,10 @@ class Config:
     SECURITY_POST_RESET_REDIRECT_ENDPOINT = None
     SECURITY_POST_CHANGE_REDIRECT_ENDPOINT = None
 
-    SECURITY_FORGOT_PASSWORD_ENDPOINT = 'security.forgot_password'
+    SECURITY_FORGOT_PASSWORD_ENDPOINT = 'security_controller.forgot_password'
     SECURITY_API_RESET_PASSWORD_HTTP_GET_REDIRECT = None
-    SECURITY_INVALID_RESET_TOKEN_REDIRECT = 'security.forgot_password'
-    SECURITY_EXPIRED_RESET_TOKEN_REDIRECT = 'security.forgot_password'
+    SECURITY_INVALID_RESET_TOKEN_REDIRECT = 'security_controller.forgot_password'
+    SECURITY_EXPIRED_RESET_TOKEN_REDIRECT = 'security_controller.forgot_password'
 
     SECURITY_SEND_REGISTER_EMAIL = True
     SECURITY_SEND_PASSWORD_CHANGE_EMAIL = True

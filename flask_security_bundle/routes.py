@@ -13,8 +13,7 @@ routes = [
     ]),
     prefix('/api/v1', [
         controller('/auth', SecurityController, rules=[
-            get('/check-auth-token', SecurityController.check_auth_token,
-                only_if=True, endpoint='security.check_auth_token'),
+            get('/check-auth-token', SecurityController.check_auth_token, only_if=True),
             post('/login', SecurityController.login,
                  endpoint='security_api.login'),
             get('/logout', SecurityController.logout,

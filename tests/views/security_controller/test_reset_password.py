@@ -11,7 +11,7 @@ class TestHtmlResetPassword:
         security_service.send_reset_password_instructions(user)
         token = password_resets[0]['token']
         client.login_user()
-        r = client.get('security.reset_password', token=token)
+        r = client.get('security_controller.reset_password', token=token)
         assert r.status_code == 302
         assert r.path == '/'
 
@@ -22,9 +22,9 @@ class TestHtmlResetPassword:
         assert len(password_resets) == 1
         token = password_resets[0]['token']
 
-        r = client.get('security.reset_password', token=token)
+        r = client.get('security_controller.reset_password', token=token)
         assert r.status_code == 302
-        assert r.path == url_for('security.forgot_password')
+        assert r.path == url_for('security_controller.forgot_password')
 
         assert len(outbox) == 2
         # first email is for the valid reset request
@@ -47,9 +47,9 @@ class TestHtmlResetPassword:
         assert error_msg in r.html
 
     def test_token_invalid(self, client, templates):
-        r = client.get('security.reset_password', token='fail')
+        r = client.get('security_controller.reset_password', token='fail')
         assert r.status_code == 302
-        assert r.path == url_for('security.forgot_password')
+        assert r.path == url_for('security_controller.forgot_password')
         r = client.follow_redirects(r)
         assert r.status_code == 200
         assert templates[0].template.name == 'security/forgot_password.html'
@@ -60,19 +60,19 @@ class TestHtmlResetPassword:
         security_service.send_reset_password_instructions(user)
         token = password_resets[0]['token']
 
-        r = client.post('security.reset_password', token=token)
+        r = client.post('security_controller.reset_password', token=token)
         assert r.status_code == 200
         assert templates[1].template.name == 'security/reset_password.html'
         assert r.html.count('Password is required.') == 2
 
-        r = client.post('security.reset_password', token=token,
+        r = client.post('security_controller.reset_password', token=token,
                         data=dict(password='short',
                                   password_confirm='short'))
         assert r.status_code == 200
         msg = 'Password must be at least 8 characters long.'
         assert msg in r.html
 
-        r = client.post('security.reset_password', token=token,
+        r = client.post('security_controller.reset_password', token=token,
                         data=dict(password='long enough',
                                   password_confirm='but not the same'))
         assert r.status_code == 200
@@ -83,7 +83,7 @@ class TestHtmlResetPassword:
         security_service.send_reset_password_instructions(user)
         token = password_resets[0]['token']
 
-        r = client.post('security.reset_password', token=token,
+        r = client.post('security_controller.reset_password', token=token,
                         data=dict(password='new password',
                                   password_confirm='new password'))
         assert r.status_code == 302

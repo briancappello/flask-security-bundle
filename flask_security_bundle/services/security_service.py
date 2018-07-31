@@ -92,7 +92,7 @@ class SecurityService(BaseService):
         confirmation_link, token = None, None
         if self.security.confirmable:
             token = security_generate_confirmation_token(user)
-            confirmation_link = url_for('security.confirm_email',
+            confirmation_link = url_for('security_controller.confirm_email',
                                         token=token, _external=True)
 
         user_registered.send(app._get_current_object(),
@@ -138,7 +138,7 @@ class SecurityService(BaseService):
         :param user: The user to send the instructions to
         """
         token = security_generate_confirmation_token(user)
-        confirmation_link = url_for('security.confirm_email',
+        confirmation_link = url_for('security_controller.confirm_email',
                                     token=token, _external=True)
 
         self.send_mail(_('flask_security_bundle.email_subject.confirm'),
@@ -157,7 +157,7 @@ class SecurityService(BaseService):
         :param user: The user to send the instructions to
         """
         token = security_generate_reset_password_token(user)
-        reset_link = url_for('security.reset_password',
+        reset_link = url_for('security_controller.reset_password',
                              token=token, _external=True)
 
         if app.config.get('SECURITY_SEND_PASSWORD_RESET_EMAIL'):

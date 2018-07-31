@@ -4,7 +4,7 @@
   <p>Welcome, {{ user.email }}!</p>
 
   {% if not security.confirmable %}
-    {% set login_url = url_for('security.login', _external=True) %}
+    {% set login_url = url_for('security_controller.login', _external=True) %}
     <p>You may now login at <a href="{{ login_url }}">{{ login_url }}</a></p>
   {% else %}
     <p>Please confirm your email by clicking the link below:</p>

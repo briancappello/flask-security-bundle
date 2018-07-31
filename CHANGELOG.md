@@ -1,5 +1,11 @@
 # CHANGELOG
 
+## 0.4.0 (unreleased)
+
+* automatically send the csrf token in the response cookie
+* use the default behavior of controllers to name endpoints (in effect, rename the prefixes from `security` to `security_controller`)
+
+
 ## 0.3.0 (2018/07/25)
 
 * update to flask unchained 0.5

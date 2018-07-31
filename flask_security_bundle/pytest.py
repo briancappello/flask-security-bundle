@@ -19,15 +19,15 @@ class SecurityTestClient(HtmlTestClient):
 
     def login_as(self, user):
         self.token = user.get_auth_token()
-        return self.get('security.check_auth_token')
+        return self.get('security_controller.check_auth_token')
 
     def login_with_creds(self, email, password):
-        return super().open('security.login', method='POST',
+        return super().open('security_controller.login', method='POST',
                             data=dict(email=email, password=password))
 
     def logout(self):
         self.token = None
-        self.get('security.logout')
+        self.get('security_controller.logout')
 
     def open(self, *args, **kwargs):
         args, kwargs = _process_test_client_args(args, kwargs)

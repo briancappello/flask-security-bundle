@@ -6,19 +6,19 @@ from flask_security import current_user
 @pytest.mark.usefixtures('user')
 class TestHtmlChangePassword:
     def test_auth_required(self, client):
-        r = client.post('security.change_password')
+        r = client.post('security_controller.change_password')
         assert r.status_code == 401
 
     def test_fields_required(self, client, templates):
         client.login_user()
-        r = client.post('security.change_password')
+        r = client.post('security_controller.change_password')
         assert r.status_code == 200
         assert templates[0].template.name == 'security/change_password.html'
         assert r.html.count('Password is required.') == 3, r.html
 
     def test_min_length(self, client, templates):
         client.login_user()
-        r = client.post('security.change_password',
+        r = client.post('security_controller.change_password',
                         data=dict(password='password',
                                   new_password='fail',
                                   new_password_confirm='fail'))
@@ -28,7 +28,7 @@ class TestHtmlChangePassword:
 
     def test_new_passwords_match(self, client, templates):
         client.login_user()
-        r = client.post('security.change_password',
+        r = client.post('security_controller.change_password',
                         data=dict(password='password',
                                   new_password='long enough',
                                   new_password_confirm='but no match'))
@@ -38,7 +38,7 @@ class TestHtmlChangePassword:
 
     def test_new_same_as_the_old(self, client, templates):
         client.login_user()
-        r = client.post('security.change_password',
+        r = client.post('security_controller.change_password',
                         data=dict(password='password',
                                   new_password='password',
                                   new_password_confirm='password'))
@@ -48,7 +48,7 @@ class TestHtmlChangePassword:
 
     def test_valid_new_password(self, client, user):
         client.login_user()
-        r = client.post('security.change_password',
+        r = client.post('security_controller.change_password',
                         data=dict(password='password',
                                   new_password='new password',
                                   new_password_confirm='new password'))

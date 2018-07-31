@@ -4,13 +4,13 @@ import pytest
 @pytest.mark.usefixtures('user')
 class TestHtmlForgotPassword:
     def test_email_required(self, client, templates):
-        r = client.post('security.forgot_password')
+        r = client.post('security_controller.forgot_password')
         assert r.status_code == 200
         assert templates[0].template.name == 'security/forgot_password.html'
         assert 'Email is required.' in r.html, r.html
 
     def test_valid_email_required(self, client, templates):
-        r = client.post('security.forgot_password',
+        r = client.post('security_controller.forgot_password',
                         data=dict(email='fail'))
         assert r.status_code == 200
         assert templates[0].template.name == 'security/forgot_password.html'
@@ -19,7 +19,7 @@ class TestHtmlForgotPassword:
 
     def test_anonymous_user_required(self, client, templates):
         client.login_user()
-        r = client.post('security.forgot_password')
+        r = client.post('security_controller.forgot_password')
         assert r.status_code == 302
         assert r.path == '/'
         r = client.follow_redirects(r)
@@ -27,7 +27,7 @@ class TestHtmlForgotPassword:
         assert templates[0].template.name == 'site/index.html'
 
     def test_valid_request(self, user, client, outbox, templates):
-        r = client.post('security.forgot_password',
+        r = client.post('security_controller.forgot_password',
                         data=dict(email=user.email))
         assert r.status_code == 200
         assert len(outbox) == 1
