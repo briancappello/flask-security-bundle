@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-07-24 02:42-0600\n"
+"POT-Creation-Date: 2018-07-31 10:51-0600\n"
 "PO-Revision-Date: 2018-07-11 17:48-0600\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -105,11 +105,11 @@ msgstr "Your email has already been confirmed."
 msgid "flask_security_bundle.email_invalid"
 msgstr "Invalid email address."
 
-#: flask_security_bundle/models/user.py:15
+#: flask_security_bundle/models/user.py:17
 msgid "flask_security_bundle.email_required"
 msgstr "Email is required."
 
-#: flask_security_bundle/models/user.py:18
+#: flask_security_bundle/models/user.py:20
 msgid "flask_security_bundle.password_required"
 msgstr "Password is required."
 
@@ -157,49 +157,57 @@ msgstr "Reset Password"
 msgid "flask_security_bundle.heading.send_confirmation_email"
 msgstr "Resend Confirmation Email"
 
-#: flask_security_bundle/views/security_controller.py:86
+#: flask_security_bundle/views/security_controller.py:37
+msgid "flask_security_bundle.flash.login"
+msgstr "Welcome %(user)s!"
+
+#: flask_security_bundle/views/security_controller.py:58
+msgid "flask_security_bundle.flash.logout"
+msgstr "You have been successfully logged out."
+
+#: flask_security_bundle/views/security_controller.py:88
 msgid "flask_security_bundle.flash.confirmation_request"
 msgstr "Confirmation instructions have been sent to %(email)s."
 
-#: flask_security_bundle/views/security_controller.py:105
+#: flask_security_bundle/views/security_controller.py:107
 msgid "flask_security_bundle.flash.invalid_confirmation_token"
 msgstr "Invalid confirmation token."
 
-#: flask_security_bundle/views/security_controller.py:114
+#: flask_security_bundle/views/security_controller.py:116
 msgid "flask_security_bundle.flash.confirmation_expired"
 msgstr ""
 "You did not confirm your email within %(within)s. New instructions to "
 "confirm your email have been sent to %(email)s."
 
-#: flask_security_bundle/views/security_controller.py:123
+#: flask_security_bundle/views/security_controller.py:125
 msgid "flask_security_bundle.flash.email_confirmed"
 msgstr "Thank you. Your email has been confirmed."
 
-#: flask_security_bundle/views/security_controller.py:126
+#: flask_security_bundle/views/security_controller.py:128
 msgid "flask_security_bundle.flash.already_confirmed"
 msgstr "Your email has already been confirmed."
 
-#: flask_security_bundle/views/security_controller.py:145
+#: flask_security_bundle/views/security_controller.py:147
 msgid "flask_security_bundle.flash.password_reset_request"
 msgstr "Instructions to reset your password have been sent to %(email)s."
 
-#: flask_security_bundle/views/security_controller.py:165
+#: flask_security_bundle/views/security_controller.py:166
 msgid "flask_security_bundle.flash.invalid_reset_password_token"
 msgstr "Invalid reset password token."
 
-#: flask_security_bundle/views/security_controller.py:172
+#: flask_security_bundle/views/security_controller.py:173
 msgid "flask_security_bundle.flash.password_reset_expired"
 msgstr ""
 "You did not reset your password within %(within)s. New instructions have "
 "been sent to %(email)s."
 
-#: flask_security_bundle/views/security_controller.py:185
+#: flask_security_bundle/views/security_controller.py:186
 msgid "flask_security_bundle.flash.password_reset"
 msgstr ""
 "You successfully reset your password and you have been logged in "
 "automatically."
 
-#: flask_security_bundle/views/security_controller.py:212
+#: flask_security_bundle/views/security_controller.py:213
 msgid "flask_security_bundle.flash.password_change"
 msgstr "You successfully changed your password."
 

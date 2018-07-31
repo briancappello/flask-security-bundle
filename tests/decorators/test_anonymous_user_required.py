@@ -66,7 +66,7 @@ class TestAnonymousUserRequired:
         r = method()
         assert r.status_code == 302
         assert r.location == '/must-be-anon'
-        assert session['_flashes'][0] == ('error', 'must be anon')
+        assert ('error', 'must be anon') in session['_flashes']
 
     def test_anonymous_user_allowed(self):
         @anonymous_user_required

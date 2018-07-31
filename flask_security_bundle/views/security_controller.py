@@ -34,6 +34,8 @@ class SecurityController(Controller):
             if request.is_json:
                 return self.jsonify({'token': form.user.get_auth_token(),
                                      'user': form.user})
+            self.flash(_('flask_security_bundle.flash.login', user=form.user.first_name),
+                       category='success')
             return self.redirect('SECURITY_POST_LOGIN_REDIRECT_ENDPOINT')
 
         elif form.errors:
@@ -53,6 +55,8 @@ class SecurityController(Controller):
 
         if request.is_json:
             return '', HTTPStatus.NO_CONTENT
+
+        self.flash(_('flask_security_bundle.flash.logout'), category='success')
         return self.redirect('SECURITY_POST_LOGOUT_REDIRECT_ENDPOINT')
 
     @route(methods=['GET', 'POST'],
@@ -153,7 +157,7 @@ class SecurityController(Controller):
                            forgot_password_form=form,
                            **security_template_ctx('forgot_password'))
 
-    @route('/reset-password/<token>', methods=['GET', 'POST'],
+    @route('/reset-password/<string:token>', methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_RECOVERABLE'))
     @anonymous_user_required
     def reset_password(self, token):
