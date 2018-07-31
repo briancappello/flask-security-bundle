@@ -6,6 +6,8 @@ from flask_unchained import lazy_gettext as _
 from .user_role import UserRole
 from ..validators import EmailValidator
 
+MIN_PASSWORD_LENGTH = 8
+
 
 class User(db.Model, UserMixin):
     class Meta:
@@ -36,7 +38,6 @@ class User(db.Model, UserMixin):
 
     @classmethod
     def validate_password(cls, password):
-        min_len = 8
-        if not password or len(password) < min_len:
-            msg = f'Password must be at least {min_len} characters long.'
-            raise db.ValidationError(msg)
+        if not password or len(password) < MIN_PASSWORD_LENGTH:
+            raise db.ValidationError(f'Password must be at least '
+                                     f'{MIN_PASSWORD_LENGTH} characters long.')
