@@ -1,6 +1,6 @@
 {% extends 'email/layout.html' %}
 
-{% block body %}
+{% block content %}
   <p>Your password has been changed.</p>
   {% if security.recoverable %}
     {% set forgot_url = url_for('SECURITY_FORGOT_PASSWORD_ENDPOINT', _external=True) %}

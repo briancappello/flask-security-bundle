@@ -1,6 +1,6 @@
 {% extends 'email/layout.html' %}
 
-{% block body %}
+{% block content %}
   <p>Welcome, {{ user.email }}!</p>
 
   {% if not security.confirmable %}

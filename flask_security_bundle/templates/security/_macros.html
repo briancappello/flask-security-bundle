@@ -1,22 +1,30 @@
-{% macro render_field_with_errors(field) %}
-  <p>
-    {{ field.label }} {{ field(**kwargs)|safe }}
-    {% if field.errors %}
-      <ul class="errors">
-      {% for error in field.errors %}
-        <li class="error">{{ error }}</li>
-      {% endfor %}
-      </ul>
-    {% endif %}
-  </p>
+{% macro render_form(form) %}
+  {% set action = kwargs.get('action', url_for(kwargs['endpoint'])) %}
+  <form name="{{ form.name }}" action="{{ action }}" method="POST">
+    {{ _maybe_render_errors(form.errors.get('_error', [])) }}
+    {% for field in form %}
+      {{ _render_field(field) }}
+    {% endfor %}
+  </form>
 {% endmacro %}
 
-{% macro render_field(field) %}
-  <p>{{ field(**kwargs)|safe }}</p>
+{% macro _render_field(field) %}
+  {% set input_type = field.widget.input_type %}
+  {% if input_type in ('submit', 'hidden') %}
+    {{ field(**kwargs)|safe }}
+  {% else %}
+    <p>
+      {{ field.label }}
+      {{ field(**kwargs)|safe }}
+      {% if field.description %}
+        <small class="form-field-description">{{ field.description }}</small>
+      {% endif %}
+      {{ _maybe_render_errors(field.errors) }}
+    </p>
+  {% endif %}
 {% endmacro %}
 
-{% macro form_errors(form) %}
-  {% set errors = form.errors.get('_error', []) %}
+{% macro _maybe_render_errors(errors) %}
   {% if errors %}
     <ul class="errors">
     {% for error in errors %}

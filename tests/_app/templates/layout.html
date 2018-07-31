@@ -6,7 +6,7 @@
 </head>
 
 <body>
-  {% block body %}
+  {% block content %}
     {% block flashes %}
       {%- with messages = get_flashed_messages(with_categories=true) -%}
         {% if messages %}
@@ -18,7 +18,7 @@
         {% endif %}
       {%- endwith %}
     {% endblock flashes %}
-  {% endblock body %}
+  {% endblock content %}
 </body>
 
 </html>

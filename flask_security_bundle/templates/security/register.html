@@ -1,7 +1,9 @@
-{% extends 'layout.html' %}
+{% extends 'security/layout.html' %}
 
-{% block body %}
+{% from 'security/_macros.html' import render_form %}
+
+{% block content %}
   {{ super() }}
   <h1>{{ _('flask_security_bundle.heading.register') }}</h1>
-  {% include 'security/register_form.html' %}
+  {{ render_form(register_user_form, endpoint='security_controller.register') }}
 {% endblock %}

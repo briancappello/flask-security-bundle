@@ -1,8 +1,0 @@
-{% from "security/_macros.html" import form_errors, render_field_with_errors, render_field %}
-
-<form action="{{ url_for('security_controller.send_confirmation_email') }}" method="POST" name="send_confirmation_form">
-  {{ form_errors(send_confirmation_form) }}
-  {{ send_confirmation_form.hidden_tag() }}
-  {{ render_field_with_errors(send_confirmation_form.email) }}
-  {{ render_field(send_confirmation_form.submit) }}
-</form>
