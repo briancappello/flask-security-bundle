@@ -133,27 +133,27 @@ msgid "flask_security_bundle.email_subject.password_reset"
 msgstr ""
 
 #: flask_security_bundle/templates/security/change_password.html:5
-msgid "flask_security_bundle.change_password"
+msgid "flask_security_bundle.heading.change_password"
 msgstr ""
 
 #: flask_security_bundle/templates/security/forgot_password.html:5
-msgid "flask_security_bundle.forgot_password"
+msgid "flask_security_bundle.heading.forgot_password"
 msgstr ""
 
 #: flask_security_bundle/templates/security/login.html:5
-msgid "flask_security_bundle.login"
+msgid "flask_security_bundle.heading.login"
 msgstr ""
 
 #: flask_security_bundle/templates/security/register.html:5
-msgid "flask_security_bundle.register"
+msgid "flask_security_bundle.heading.register"
 msgstr ""
 
 #: flask_security_bundle/templates/security/reset_password.html:5
-msgid "flask_security_bundle.reset_password"
+msgid "flask_security_bundle.heading.reset_password"
 msgstr ""
 
 #: flask_security_bundle/templates/security/send_confirmation_email.html:5
-msgid "flask_security_bundle.send_confirmation_email"
+msgid "flask_security_bundle.heading.send_confirmation_email"
 msgstr ""
 
 #: flask_security_bundle/views/security_controller.py:86
