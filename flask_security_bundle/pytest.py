@@ -4,8 +4,7 @@ import pytest
 from flask_security.signals import (reset_password_instructions_sent,
                                     user_confirmed, user_registered)
 from flask_security_bundle import FlaskSecurityBundle
-from flask_unchained.pytest import (
-    ApiTestResponse, HtmlTestClient, HtmlTestResponse, _process_test_client_args)
+from flask_unchained.pytest import ApiTestResponse, HtmlTestClient, HtmlTestResponse
 
 
 class SecurityTestClient(HtmlTestClient):
