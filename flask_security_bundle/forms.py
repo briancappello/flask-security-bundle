@@ -8,7 +8,8 @@ from wtforms import (Field, HiddenField, StringField, SubmitField, ValidationErr
                      fields, validators)
 
 from .services import SecurityService, UserManager
-from .utils import current_user, verify_and_update_password
+from .utils import (
+    current_user, user_loader, get_identity_attributes, verify_and_update_password)
 
 
 password_equal = validators.EqualTo('password', message=_(
@@ -70,14 +71,13 @@ class LoginForm(BaseForm, NextFormMixin):
             self.next.data = request.args.get('next', '')
         self.remember.default = app.config.get('SECURITY_DEFAULT_REMEMBER_ME')
 
-    def get_user(self):
-        return self.security_service.user_manager.get_by(email=self.email.data)
-
     def validate(self):
         if not super().validate():
-            return False
+            # FIXME-identity
+            if set(self.errors.keys()) - set(get_identity_attributes()):
+                return False
 
-        self.user = self.get_user()
+        self.user = user_loader(self.email.data)
 
         if self.user is None:
             self.email.errors.append(

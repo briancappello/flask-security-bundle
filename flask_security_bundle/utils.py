@@ -220,3 +220,28 @@ def get_within_delta(key):
     txt = current_app.config.get(key)
     values = txt.split()
     return timedelta(**{values[1]: int(values[0])})
+
+
+# FIXME-identity
+def get_identity_attributes():
+    attrs = current_app.config['SECURITY_USER_IDENTITY_ATTRIBUTES']
+    try:
+        attrs = [f.strip() for f in attrs.split(',')]
+    except AttributeError:
+        pass
+    return attrs
+
+
+# FIXME-identity
+@unchained.inject('user_manager')
+def user_loader(user_identifier, user_manager=injectable):
+    try:
+        user_identifier = int(user_identifier)
+    except (ValueError, TypeError):
+        for attr in get_identity_attributes():
+            print('attempting to get user by', attr, user_identifier)
+            user = user_manager.get_by(**{attr: user_identifier})
+            if user:
+                return user
+    else:
+        return user_manager.get(user_identifier)

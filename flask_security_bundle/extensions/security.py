@@ -9,7 +9,7 @@ from types import FunctionType
 from typing import *
 
 from ..models import AnonymousUser, User
-from ..utils import current_user, verify_hash
+from ..utils import current_user, user_loader, verify_hash
 from ..services.user_manager import UserManager
 
 
@@ -139,10 +139,7 @@ class Security(_SecurityConfigProperties):
         lm.anonymous_user = anonymous_user or AnonymousUser
         lm.localize_callback = _
         lm.request_loader(self._request_loader)
-
-        # FIXME: identity
-        lm.user_loader(lambda id: self.datastore.get_user(id))
-
+        lm.user_loader(user_loader)
         lm.login_view = 'security_controller.login'
         lm.login_message, _('flask_security_bundle.error.login_required')
         lm.login_message_category = 'info'
