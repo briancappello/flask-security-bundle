@@ -110,20 +110,18 @@ class ForgotPasswordForm(BaseForm):
 
 class PasswordFormMixin:
     password = fields.PasswordField(_('flask_security_bundle.form_field.password'))
-
-
-class PasswordConfirmFormMixin:
     password_confirm = fields.PasswordField(
         _('flask_security_bundle.form_field.retype_password'),
         validators=[password_equal])
 
 
-class ChangePasswordForm(BaseForm, PasswordFormMixin):
+class ChangePasswordForm(BaseForm):
     class Meta:
         model = 'User'
         model_fields = {'new_password': 'password',
                         'new_password_confirm': 'password'}
 
+    password = fields.PasswordField(_('flask_security_bundle.form_field.password'))
     new_password = fields.PasswordField(
         _('flask_security_bundle.form_field.new_password'))
     new_password_confirm = fields.PasswordField(
@@ -146,7 +144,7 @@ class ChangePasswordForm(BaseForm, PasswordFormMixin):
         return result
 
 
-class ConfirmRegisterForm(BaseForm, PasswordFormMixin):
+class RegisterForm(BaseForm, PasswordFormMixin, NextFormMixin):
     class Meta:
         model = 'User'
 
@@ -164,11 +162,7 @@ class ConfirmRegisterForm(BaseForm, PasswordFormMixin):
         return dict((key, value.data) for key, value in fields)
 
 
-class RegisterForm(ConfirmRegisterForm, PasswordConfirmFormMixin, NextFormMixin):
-    pass
-
-
-class ResetPasswordForm(BaseForm, PasswordFormMixin, PasswordConfirmFormMixin):
+class ResetPasswordForm(BaseForm, PasswordFormMixin):
     class Meta:
         model = 'User'
         model_fields = {'password_confirm': 'password'}

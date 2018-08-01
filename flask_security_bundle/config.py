@@ -4,7 +4,6 @@ from http import HTTPStatus
 
 from .forms import (
     LoginForm,
-    ConfirmRegisterForm,
     RegisterForm,
     ForgotPasswordForm,
     ResetPasswordForm,
@@ -51,7 +50,6 @@ class Config:
     # ============
     SECURITY_REGISTERABLE = False
     SECURITY_REGISTER_FORM = RegisterForm
-    SECURITY_CONFIRM_REGISTER_FORM = ConfirmRegisterForm
     SECURITY_POST_REGISTER_REDIRECT_ENDPOINT = None
     SECURITY_SEND_REGISTER_EMAIL = True
 

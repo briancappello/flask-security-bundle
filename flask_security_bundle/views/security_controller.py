@@ -63,11 +63,7 @@ class SecurityController(Controller):
            only_if=lambda app: app.config.get('SECURITY_REGISTERABLE'))
     @anonymous_user_required
     def register(self):
-        form_name = ('SECURITY_CONFIRM_REGISTER_FORM'
-                     if app.config.get('SECURITY_CONFIRMABLE')
-                     else 'SECURITY_REGISTER_FORM')
-        form = self._get_form(form_name)
-
+        form = self._get_form('SECURITY_REGISTER_FORM')
         if form.validate_on_submit():
             user = self.security_service.user_manager.create(**form.to_dict())
             self.security_service.register_user(user)

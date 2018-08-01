@@ -1,10 +1,9 @@
 import pytest
 
-from tests._bundles.security.forms import ConfirmRegisterForm, RegisterForm
+from tests._bundles.security.forms import RegisterForm
 
 
-@pytest.mark.options(SECURITY_REGISTER_FORM=RegisterForm,
-                     SECURITY_CONFIRM_REGISTER_FORM=ConfirmRegisterForm)
+@pytest.mark.options(SECURITY_REGISTER_FORM=RegisterForm)
 class TestRegister:
     def test_get(self, client, templates):
         r = client.get('security_controller.register')
