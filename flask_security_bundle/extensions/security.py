@@ -1,15 +1,16 @@
-from flask import Flask
+from flask import Request
 from flask_login import LoginManager
 from flask_principal import Principal, Identity, UserNeed, RoleNeed, identity_loaded
-from flask_unchained import lazy_gettext as _
+from flask_unchained import FlaskUnchained, injectable, lazy_gettext as _
 from flask_unchained.utils import ConfigProperty, ConfigPropertyMeta
 from itsdangerous import URLSafeTimedSerializer
 from passlib.context import CryptContext
 from types import FunctionType
+from typing import *
 
-from ..models import AnonymousUser
+from ..models import AnonymousUser, User
 from ..utils import current_user, verify_hash
-from ..services._datastore_adapter import DatastoreAdapter
+from ..services.user_manager import UserManager
 
 
 class _SecurityConfigProperties(metaclass=ConfigPropertyMeta):
@@ -53,12 +54,15 @@ class Security(_SecurityConfigProperties):
         self.remember_token_serializer = None
         self.reset_serializer = None
 
-    def init_app(self, app: Flask):
+    def inject_services(self, user_manager: UserManager = injectable):
+        self.user_manager = user_manager
+
+    def init_app(self, app: FlaskUnchained):
+        # NOTE: the order of these `self.get_*` initialization calls is important!
         self.confirm_serializer = self._get_serializer(app, 'confirm')
         self.hashing_context = self._get_hashing_context(app)
         self.login_manager = self._get_login_manager(
             app, app.config.get('SECURITY_ANONYMOUS_USER'))
-        self.login_manager.id_attribute = 'id'
         self.login_serializer = self._get_serializer(app, 'login')
         self.principal = self._get_principal(app)
         self.pwd_context = self._get_pwd_context(app)
@@ -67,13 +71,14 @@ class Security(_SecurityConfigProperties):
 
         self.context_processor(lambda: dict(security=_SecurityConfigProperties()))
 
+        # FIXME: should this be easier to customizer for end users, perhaps by making
+        # FIXME: the function come from a config setting?
         identity_loaded.connect_via(app)(self._on_identity_loaded)
         app.extensions['security'] = self
 
-    def inject_services(self, user_manager):
-        self.datastore = DatastoreAdapter(user_manager)
-        self.login_manager.user_loader(user_manager.get)
-        self.user_manager = user_manager
+    ######################################################
+    # public api to register template context processors #
+    ######################################################
 
     def context_processor(self, fn):
         self._add_ctx_processor(None, fn)
@@ -109,14 +114,27 @@ class Security(_SecurityConfigProperties):
                 rv.update(fn())
         return rv
 
-    def _get_hashing_context(self, app):
+    # protected
+    def _add_ctx_processor(self, endpoint, fn) -> None:
+        group = self._context_processors.setdefault(endpoint, [])
+        if fn not in group:
+            group.append(fn)
+
+    ##########################################
+    # protected api methods used by init_app #
+    ##########################################
+
+    def _get_hashing_context(self, app: FlaskUnchained) -> CryptContext:
         schemes = app.config.get('SECURITY_HASHING_SCHEMES')
         deprecated = app.config.get('SECURITY_DEPRECATED_HASHING_SCHEMES')
         return CryptContext(
             schemes=schemes,
             deprecated=deprecated)
 
-    def _get_login_manager(self, app, anonymous_user):
+    def _get_login_manager(self,
+                           app: FlaskUnchained,
+                           anonymous_user: AnonymousUser,
+                           ) -> LoginManager:
         lm = LoginManager()
         lm.anonymous_user = anonymous_user or AnonymousUser
         lm.localize_callback = _
@@ -128,17 +146,18 @@ class Security(_SecurityConfigProperties):
         lm.login_view = 'security_controller.login'
         lm.login_message, _('flask_security_bundle.error.login_required')
         lm.login_message_category = 'info'
-        lm.needs_refresh_message = _('flask_security_bundle.error.fresh_login_required')
+        lm.needs_refresh_message = _(
+            'flask_security_bundle.error.fresh_login_required')
         lm.needs_refresh_message_category = 'info'
         lm.init_app(app)
         return lm
 
-    def _get_principal(self, app):
+    def _get_principal(self, app: FlaskUnchained) -> Principal:
         p = Principal(app, use_sessions=False)
         p.identity_loader(self._identity_loader)
         return p
 
-    def _get_pwd_context(self, app):
+    def _get_pwd_context(self, app: FlaskUnchained) -> CryptContext:
         pw_hash = app.config.get('SECURITY_PASSWORD_HASH')
         schemes = app.config.get('SECURITY_PASSWORD_SCHEMES')
         deprecated = app.config.get('SECURITY_DEPRECATED_PASSWORD_SCHEMES')
@@ -152,19 +171,22 @@ class Security(_SecurityConfigProperties):
             default=pw_hash,
             deprecated=deprecated)
 
-    def _get_serializer(self, app, name):
+    def _get_serializer(self, app: FlaskUnchained, name: str) -> URLSafeTimedSerializer:
+        """
+        :param app: the :class:`FlaskUnchained` instance
+        :param name: one of ``confirm``, ``login``, ``remember``, or ``reset``
+        :return: URLSafeTimedSerializer
+        """
         secret_key = app.config.get('SECRET_KEY')
         salt = app.config.get('SECURITY_%s_SALT' % name.upper())
         return URLSafeTimedSerializer(secret_key=secret_key, salt=salt)
 
-    @staticmethod
-    def _identity_loader():
+    def _identity_loader(self) -> Union[Identity, None]:
         if not isinstance(current_user._get_current_object(), AnonymousUser):
             identity = Identity(current_user.id)
             return identity
 
-    @staticmethod
-    def _on_identity_loaded(sender, identity):
+    def _on_identity_loaded(self, sender, identity: Identity) -> None:
         if hasattr(current_user, 'id'):
             identity.provides.add(UserNeed(current_user.id))
 
@@ -173,7 +195,7 @@ class Security(_SecurityConfigProperties):
 
         identity.user = current_user
 
-    def _request_loader(self, request):
+    def _request_loader(self, request: Request) -> Union[User, AnonymousUser]:
         header_key = self.token_authentication_header
         args_key = self.token_authentication_key
         header_token = request.headers.get(header_key, None)
