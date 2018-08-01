@@ -11,6 +11,7 @@
 * do not depend on `current_user`, `login_user`, `logout_user`, `hash_password`, `get_hmac`, `user_double_hash`, `confirm_email_token_status`, and `reset_password_token_status` utility functions from flask_security
 * do not depend on signals from flask_security
 * do not depend on `auth_required` decorator from flask_security
+* do not depend on `flask_security.core` module
 * refactor register form to always require password confirmation
 
 ## 0.3.0 (2018/07/25)
