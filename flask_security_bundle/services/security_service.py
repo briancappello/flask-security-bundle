@@ -161,23 +161,27 @@ class SecurityService(BaseService):
         user.password = password
         self.user_manager.save(user)
         password_changed.send(app._get_current_object(), user=user)
-        if app.config.get('SECURITY_SEND_PASSWORD_CHANGE_EMAIL'):
-            self.send_mail(_('flask_security_bundle.email_subject.password_change_notice'),
-                           to=user.email,
-                           template='security/email/change_notice.html',
-                           user=user)
+
+        if app.config.get('SECURITY_SEND_PASSWORD_CHANGED_EMAIL'):
+            self.send_mail(
+                _('flask_security_bundle.email_subject.password_changed_notice'),
+                to=user.email,
+                template='security/email/password_changed_notice.html',
+                user=user)
 
     def reset_password(self, user, password):
         user.password = password
         self.user_manager.save(user)
         password_reset.send(app._get_current_object(), user=user)
-        if app.config.get('SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL'):
-            self.send_mail(_('flask_security_bundle.email_subject.password_notice'),
-                           to=user.email,
-                           template='security/email/reset_notice.html',
-                           user=user)
 
-    def send_confirmation_instructions(self, user):
+        if app.config.get('SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL'):
+            self.send_mail(
+                _('flask_security_bundle.email_subject.reset_password_instructions_notice'),
+                to=user.email,
+                template='security/email/password_reset_notice.html',
+                user=user)
+
+    def send_email_confirmation_instructions(self, user):
         """
         Sends the confirmation instructions email for the specified user.
 
@@ -188,12 +192,12 @@ class SecurityService(BaseService):
         token = security_generate_confirmation_token(user)
         confirmation_link = url_for('security_controller.confirm_email',
                                     token=token, _external=True)
-
-        self.send_mail(_('flask_security_bundle.email_subject.confirm'),
-                       to=user.email,
-                       template='security/email/confirmation_instructions.html',
-                       user=user,
-                       confirmation_link=confirmation_link)
+        self.send_mail(
+            _('flask_security_bundle.email_subject.email_confirmation_instructions'),
+            to=user.email,
+            template='security/email/email_confirmation_instructions.html',
+            user=user,
+            confirmation_link=confirmation_link)
 
         confirm_instructions_sent.send(app._get_current_object(), user=user,
                                        token=token)
@@ -224,6 +228,7 @@ class SecurityService(BaseService):
         user.confirmed_at = self.security.datetime_factory()
         user.active = True
         self.user_manager.save(user)
+
         user_confirmed.send(app._get_current_object(), user=user)
         return True
 

@@ -29,11 +29,11 @@ class TestHtmlResetPassword:
         assert len(outbox) == 2
         # first email is for the valid reset request
         assert templates[0].template.name == \
-               'security/email/reset_instructions.html'
+               'security/email/reset_password_instructions.html'
         assert templates[0].context.get('reset_link')
         # second email is with a new token
         assert templates[1].template.name == \
-               'security/email/reset_instructions.html'
+               'security/email/reset_password_instructions.html'
         assert templates[1].context.get('reset_link')
         assert templates[0].context.get('reset_link') != \
                templates[1].context.get('reset_link')
@@ -94,10 +94,10 @@ class TestHtmlResetPassword:
         assert len(outbox) == len(templates) == 2
         # first email is for the valid reset request
         assert templates[0].template.name == \
-               'security/email/reset_instructions.html'
+               'security/email/reset_password_instructions.html'
         assert templates[0].context.get('reset_link')
         # second email is to notify of the changed password
-        assert templates[1].template.name == 'security/email/reset_notice.html'
+        assert templates[1].template.name == 'security/email/password_reset_notice.html'
 
         # make sure the password got updated in the database
         client.logout()
@@ -146,11 +146,11 @@ class TestApiResetPassword:
         assert len(outbox) == len(templates) == 2
         # first email is for the valid reset request
         assert templates[0].template.name == \
-               'security/email/reset_instructions.html'
+               'security/email/reset_password_instructions.html'
         assert templates[0].context.get('reset_link')
         # second email is with a new token
         assert templates[1].template.name == \
-               'security/email/reset_instructions.html'
+               'security/email/reset_password_instructions.html'
         assert templates[1].context.get('reset_link')
         assert templates[0].context.get('reset_link') != templates[1].context.get('reset_link')
 
@@ -205,10 +205,10 @@ class TestApiResetPassword:
         assert len(outbox) == len(templates) == 2
         # first email is for the valid reset request
         assert templates[0].template.name == \
-               'security/email/reset_instructions.html'
+               'security/email/reset_password_instructions.html'
         assert templates[0].context.get('reset_link')
         # second email is to notify of the changed password
-        assert templates[1].template.name == 'security/email/reset_notice.html'
+        assert templates[1].template.name == 'security/email/password_reset_notice.html'
 
         # make sure the password got updated in the database
         api_client.logout()

@@ -42,7 +42,7 @@ class TestConfirmEmail:
         assert len(outbox) == len(templates) == 2
         assert templates[0].template.name == 'security/email/welcome.html'
         assert templates[1].template.name == \
-               'security/email/confirmation_instructions.html'
+               'security/email/email_confirmation_instructions.html'
         assert templates[1].context.get('confirmation_link')
 
         assert not user.active

@@ -1,14 +1,14 @@
 {% macro render_form(form) %}
   {% set action = kwargs.get('action', url_for(kwargs['endpoint'])) %}
   <form name="{{ form.name }}" action="{{ action }}" method="POST">
-    {{ _maybe_render_errors(form.errors.get('_error', [])) }}
+    {{ render_errors(form.errors.get('_error', [])) }}
     {% for field in form %}
-      {{ _render_field(field) }}
+      {{ render_field(field) }}
     {% endfor %}
   </form>
 {% endmacro %}
 
-{% macro _render_field(field) %}
+{% macro render_field(field) %}
   {% set input_type = field.widget.input_type %}
   {% if input_type in ('submit', 'hidden') %}
     {{ field(**kwargs)|safe }}
@@ -19,12 +19,12 @@
       {% if field.description %}
         <small class="form-field-description">{{ field.description }}</small>
       {% endif %}
-      {{ _maybe_render_errors(field.errors) }}
+      {{ render_errors(field.errors) }}
     </p>
   {% endif %}
 {% endmacro %}
 
-{% macro _maybe_render_errors(errors) %}
+{% macro render_errors(errors) %}
   {% if errors %}
     <ul class="errors">
     {% for error in errors %}

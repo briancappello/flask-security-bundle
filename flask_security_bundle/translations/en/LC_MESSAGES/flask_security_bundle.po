@@ -118,19 +118,19 @@ msgid "flask_security_bundle.email_subject.register"
 msgstr "Welcome!"
 
 #: flask_security_bundle/services/security_service.py:117
-msgid "flask_security_bundle.email_subject.password_change_notice"
+msgid "flask_security_bundle.email_subject.password_changed_notice"
 msgstr "Your password has been changed."
 
 #: flask_security_bundle/services/security_service.py:127
-msgid "flask_security_bundle.email_subject.password_notice"
+msgid "flask_security_bundle.email_subject.reset_password_instructions_notice"
 msgstr "Your password has been reset."
 
 #: flask_security_bundle/services/security_service.py:144
-msgid "flask_security_bundle.email_subject.confirm"
+msgid "flask_security_bundle.email_subject.email_confirmation_instructions"
 msgstr "Please confirm your email"
 
 #: flask_security_bundle/services/security_service.py:164
-msgid "flask_security_bundle.email_subject.password_reset"
+msgid "flask_security_bundle.email_subject.reset_password_instructions"
 msgstr "Password reset instructions"
 
 #: flask_security_bundle/templates/security/change_password.html:5

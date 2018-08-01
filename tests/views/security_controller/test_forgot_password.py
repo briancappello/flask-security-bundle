@@ -32,7 +32,7 @@ class TestHtmlForgotPassword:
         assert r.status_code == 200
         assert len(outbox) == 1
         assert templates[0].template.name == \
-               'security/email/reset_instructions.html'
+               'security/email/reset_password_instructions.html'
         assert templates[0].context.get('reset_link')
 
         assert templates[1].template.name == 'security/forgot_password.html'
@@ -66,5 +66,5 @@ class TestApiForgotPassword:
         assert r.status_code == 204
         assert len(outbox) == len(templates) == 1
         assert templates[0].template.name == \
-           'security/email/reset_instructions.html'
+           'security/email/reset_password_instructions.html'
         assert templates[0].context.get('reset_link')

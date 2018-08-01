@@ -33,7 +33,7 @@ class TestHtmlSendConfirmationEmail:
         assert len(outbox) == 2
         assert len(templates) == 3
         assert templates[1].template.name == \
-               'security/email/confirmation_instructions.html'
+               'security/email/email_confirmation_instructions.html'
         assert templates[0].context.get('confirmation_link') != \
                templates[1].context.get('confirmation_link')
 
@@ -72,6 +72,6 @@ class TestApiSendConfirmationEmail:
         # make sure they get emailed a new confirmation token
         assert len(outbox) == len(templates) == 2
         assert templates[1].template.name == \
-               'security/email/confirmation_instructions.html'
+               'security/email/email_confirmation_instructions.html'
         assert templates[0].context.get('confirmation_link') != \
                templates[1].context.get('confirmation_link')

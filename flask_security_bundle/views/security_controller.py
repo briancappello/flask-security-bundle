@@ -81,7 +81,7 @@ class SecurityController(Controller):
         """
         form = self._get_form('SECURITY_SEND_CONFIRMATION_FORM')
         if form.validate_on_submit():
-            self.security_service.send_confirmation_instructions(form.user)
+            self.security_service.send_email_confirmation_instructions(form.user)
             self.flash(_('flask_security_bundle.flash.confirmation_request',
                          email=form.user.email), category='info')
             if request.is_json:
@@ -98,16 +98,14 @@ class SecurityController(Controller):
            only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
     def confirm_email(self, token):
         expired, invalid, user = confirm_email_token_status(token)
-
         if not user or invalid:
             invalid = True
             self.flash(_('flask_security_bundle.flash.invalid_confirmation_token'),
                        category='error')
 
         already_confirmed = user is not None and user.confirmed_at is not None
-
         if expired and not already_confirmed:
-            self.security_service.send_confirmation_instructions(user)
+            self.security_service.send_email_confirmation_instructions(user)
             self.flash(_('flask_security_bundle.flash.confirmation_expired',
                          email=user.email,
                          within=app.config.get('SECURITY_CONFIRM_EMAIL_WITHIN')),
@@ -138,7 +136,6 @@ class SecurityController(Controller):
                              category='success')
     def forgot_password(self):
         form = self._get_form('SECURITY_FORGOT_PASSWORD_FORM')
-
         if form.validate_on_submit():
             self.security_service.send_reset_password_instructions(form.user)
             self.flash(_('flask_security_bundle.flash.password_reset_request',
@@ -158,7 +155,6 @@ class SecurityController(Controller):
     @anonymous_user_required
     def reset_password(self, token):
         expired, invalid, user = reset_password_token_status(token)
-
         if invalid:
             self.flash(_('flask_security_bundle.flash.invalid_reset_password_token'),
                        category='error')
@@ -201,7 +197,6 @@ class SecurityController(Controller):
     @auth_required
     def change_password(self):
         form = self._get_form('SECURITY_CHANGE_PASSWORD_FORM')
-
         if form.validate_on_submit():
             self.security_service.change_password(
                 current_user._get_current_object(),
