@@ -22,6 +22,8 @@ from flask_unchained import BaseService, injectable
 
 from .user_manager import UserManager
 from ..extensions import Security
+from ..signals import (confirm_instructions_sent, reset_password_instructions_sent,
+                       password_changed, password_reset, user_confirmed, user_registered)
 
 
 class SecurityService(BaseService):

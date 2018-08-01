@@ -9,6 +9,7 @@
 * move setting of the `csrf_token` cookie to flask unchained's controller bundle
 * do not depend on `UserMixin`, `RoleMixin`, or `AnonymousUser` from flask_security
 * do not depend on `current_user`, `login_user`, `logout_user`, `hash_password`, `get_hmac`, `user_double_hash`, `confirm_email_token_status`, and `reset_password_token_status` utility functions from flask_security
+* do not depend on signals from flask_security
 * refactor register form to always require password confirmation
 
 ## 0.3.0 (2018/07/25)

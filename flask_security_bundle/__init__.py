@@ -20,6 +20,9 @@ from .decorators import (
 )
 from .models import AnonymousUser, User, Role, UserRole
 from .services import SecurityService, UserManager, RoleManager
+from .signals import (user_registered, user_confirmed, confirm_instructions_sent,
+                      login_instructions_sent, password_reset, password_changed,
+                      reset_password_instructions_sent)
 from .utils import current_user
 from .views import SecurityController, UserResource
 
