@@ -1,13 +1,7 @@
+import flask_security.core as flask_security
+
 from flask import Flask
 from flask_principal import identity_loaded
-from flask_security.core import (
-    _get_hashing_context,
-    _get_login_manager,
-    _get_principal,
-    _get_pwd_context,
-    _get_serializer,
-    _on_identity_loaded,
-)
 from flask_unchained.utils import ConfigProperty, ConfigPropertyMeta
 from types import FunctionType
 
@@ -41,7 +35,7 @@ class Security(_SecurityConfigProperties):
         self._context_processors = {}
         self._send_mail_task = None
 
-        # properties set by init_app:
+        # remaining properties are all set by `self.init_app`
         self.confirm_serializer = None
         self.datastore = None
         self.hashing_context = None
@@ -53,19 +47,20 @@ class Security(_SecurityConfigProperties):
         self.reset_serializer = None
 
     def init_app(self, app: Flask):
-        self.confirm_serializer = _get_serializer(app, 'confirm')
-        self.hashing_context = _get_hashing_context(app)
-        self.login_manager = _get_login_manager(
+        self.confirm_serializer = flask_security._get_serializer(app, 'confirm')
+        self.hashing_context = flask_security._get_hashing_context(app)
+        self.login_manager = flask_security._get_login_manager(
             app, app.config.get('SECURITY_ANONYMOUS_USER'))
-        self.login_serializer = _get_serializer(app, 'login')
-        self.principal = _get_principal(app)
-        self.pwd_context = _get_pwd_context(app)
-        self.remember_token_serializer = _get_serializer(app, 'remember')
-        self.reset_serializer = _get_serializer(app, 'reset')
+        self.login_manager.id_attribute = 'id'
+        self.login_serializer = flask_security._get_serializer(app, 'login')
+        self.principal = flask_security._get_principal(app)
+        self.pwd_context = flask_security._get_pwd_context(app)
+        self.remember_token_serializer = flask_security._get_serializer(app, 'remember')
+        self.reset_serializer = flask_security._get_serializer(app, 'reset')
 
         self.context_processor(lambda: dict(security=_SecurityConfigProperties()))
 
-        identity_loaded.connect_via(app)(_on_identity_loaded)
+        identity_loaded.connect_via(app)(flask_security._on_identity_loaded)
         app.extensions['security'] = self
 
     def inject_services(self, user_manager, role_manager, session_manager=None):
