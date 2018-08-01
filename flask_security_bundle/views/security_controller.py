@@ -1,6 +1,7 @@
 from flask import current_app as app, request
 from flask_unchained import Controller, route, lazy_gettext as _
 from flask_unchained import injectable
+from flask_unchained.bundles.sqlalchemy import SessionManager
 from http import HTTPStatus
 from werkzeug.datastructures import MultiDict
 
@@ -13,9 +14,11 @@ from ..utils import current_user, confirm_email_token_status, reset_password_tok
 class SecurityController(Controller):
     def __init__(self,
                  security: Security = injectable,
-                 security_service: SecurityService = injectable):
+                 security_service: SecurityService = injectable,
+                 session_manager: SessionManager = injectable):
         self.security = security
         self.security_service = security_service
+        self.session_manager = session_manager
 
     # require check_auth_token to be explicitly enabled
     @route(only_if=False)
@@ -224,5 +227,5 @@ class SecurityController(Controller):
         return form_cls(request.form)
 
     def _commit(self, response=None):
-        self.security_service.security.datastore.commit()
+        self.session_manager.commit()
         return response
