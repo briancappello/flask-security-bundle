@@ -4,26 +4,14 @@ from flask_login.utils import _get_user, logout_user as _logout_user
 from flask_principal import Identity, AnonymousIdentity, identity_changed
 from flask_unchained import url_for, lazy_gettext as _
 from flask_unchained.bundles.mail import Mail
-from flask_security.confirmable import (
-    generate_confirmation_token as security_generate_confirmation_token,
-)
-from flask_security.recoverable import (
-    generate_reset_password_token as security_generate_reset_password_token,
-)
-from flask_security.signals import (
-    confirm_instructions_sent,
-    password_changed,
-    password_reset,
-    reset_password_instructions_sent,
-    user_confirmed,
-    user_registered,
-)
 from flask_unchained import BaseService, injectable
 
 from .user_manager import UserManager
 from ..extensions import Security
+from ..models import User
 from ..signals import (confirm_instructions_sent, reset_password_instructions_sent,
                        password_changed, password_reset, user_confirmed, user_registered)
+from ..utils import generate_confirmation_token, generate_reset_password_token
 
 
 class SecurityService(BaseService):
@@ -35,7 +23,7 @@ class SecurityService(BaseService):
         self.security = security
         self.user_manager = user_manager
 
-    def login_user(self, user, remember=None, duration=None, force=False, fresh=True):
+    def login_user(self, user: User, remember=None, duration=None, force=False, fresh=True):
         """
         Logs a user in. You should pass the actual user object to this. If the
         user's `active` property is ``False``, they will not be logged in
@@ -59,7 +47,11 @@ class SecurityService(BaseService):
             marked as not "fresh". Defaults to ``True``.
         :type fresh: bool
         """
-        if not force and not user.active:
+        if not user.active and not force:
+            return False
+
+        if (self.security.confirmable and not user.confirmed_at
+                and not self.security.login_without_confirmation):
             return False
 
         session['user_id'] = getattr(user, user.Meta.pk)
@@ -141,7 +133,7 @@ class SecurityService(BaseService):
 
         confirmation_link, token = None, None
         if self.security.confirmable:
-            token = security_generate_confirmation_token(user)
+            token = generate_confirmation_token(user)
             confirmation_link = url_for('security_controller.confirm_email',
                                         token=token, _external=True)
 
@@ -191,7 +183,7 @@ class SecurityService(BaseService):
 
         :param user: The user to send the instructions to
         """
-        token = security_generate_confirmation_token(user)
+        token = generate_confirmation_token(user)
         confirmation_link = url_for('security_controller.confirm_email',
                                     token=token, _external=True)
         self.send_mail(
@@ -210,7 +202,7 @@ class SecurityService(BaseService):
 
         :param user: The user to send the instructions to
         """
-        token = security_generate_reset_password_token(user)
+        token = generate_reset_password_token(user)
         reset_link = url_for('security_controller.reset_password',
                              token=token, _external=True)
         self.send_mail(

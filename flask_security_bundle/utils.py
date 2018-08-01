@@ -112,6 +112,15 @@ def use_double_hash(password_hash=None):
     return not (is_plaintext or single_hash)
 
 
+def generate_confirmation_token(user):
+    """Generates a unique confirmation token for the specified user.
+
+    :param user: The user to work with
+    """
+    data = [str(user.id), hash_data(user.email)]
+    return _security.confirm_serializer.dumps(data)
+
+
 def confirm_email_token_status(token):
     """Returns the expired status, invalid status, and user of a confirmation
     token. For example::
@@ -128,6 +137,16 @@ def confirm_email_token_status(token):
         invalid = not verify_hash(token_email_hash, user.email)
 
     return expired, invalid, user
+
+
+def generate_reset_password_token(user):
+    """Generates a unique reset password token for the specified user.
+
+    :param user: The user to work with
+    """
+    password_hash = hash_data(user.password) if user.password else None
+    data = [str(user.id), password_hash]
+    return _security.reset_serializer.dumps(data)
 
 
 def reset_password_token_status(token):

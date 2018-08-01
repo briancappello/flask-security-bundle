@@ -32,8 +32,8 @@ class SecurityController(Controller):
     @anonymous_user_required(msg='You are already logged in', category='success')
     def login(self):
         form = self._get_form('SECURITY_LOGIN_FORM')
-        if form.validate_on_submit():
-            self.security_service.login_user(form.user, form.remember.data)
+        if (form.validate_on_submit()
+                and self.security_service.login_user(form.user, form.remember.data)):
             self.after_this_request(self._commit)
             if request.is_json:
                 return self.jsonify({'token': form.user.get_auth_token(),

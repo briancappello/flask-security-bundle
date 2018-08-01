@@ -8,7 +8,7 @@
 * rename email templates and service methods for consistency
 * move setting of the `csrf_token` cookie to flask unchained's controller bundle
 * do not depend on `UserMixin`, `RoleMixin`, or `AnonymousUser` from flask_security
-* do not depend on `current_user`, `login_user`, `logout_user`, `hash_password`, `get_hmac`, `user_double_hash`, `confirm_email_token_status`, and `reset_password_token_status` utility functions from flask_security
+* do not depend on `current_user`, `login_user`, `logout_user`, `hash_password`, `get_hmac`, `user_double_hash`, `generate_confirmation_token`, `confirm_email_token_status`, `generate_reset_password_token`, and `reset_password_token_status` utility functions from flask_security
 * do not depend on signals from flask_security
 * do not depend on `auth_required` decorator from flask_security
 * do not depend on `flask_security.core` module

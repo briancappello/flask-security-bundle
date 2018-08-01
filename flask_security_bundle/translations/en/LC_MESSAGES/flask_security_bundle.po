@@ -7,7 +7,7 @@ msgid ""
 msgstr ""
 "Project-Id-Version: PROJECT VERSION\n"
 "Report-Msgid-Bugs-To: EMAIL@ADDRESS\n"
-"POT-Creation-Date: 2018-07-31 10:51-0600\n"
+"POT-Creation-Date: 2018-08-01 09:58-0600\n"
 "PO-Revision-Date: 2018-07-11 17:48-0600\n"
 "Last-Translator: FULL NAME <EMAIL@ADDRESS>\n"
 "Language: en\n"
@@ -18,154 +18,167 @@ msgstr ""
 "Content-Transfer-Encoding: 8bit\n"
 "Generated-By: Babel 2.6.0\n"
 
-#: flask_security_bundle/forms.py:22 flask_security_bundle/forms.py:24
+#: flask_security_bundle/forms.py:14 flask_security_bundle/forms.py:16
 msgid "flask_security_bundle.error.retype_password_mismatch"
 msgstr "Passwords do not match."
 
-#: flask_security_bundle/forms.py:29
+#: flask_security_bundle/forms.py:23
 msgid "flask_security_bundle.error.email_already_associated"
 msgstr "%(email)s is already associated with an account."
 
-#: flask_security_bundle/forms.py:36 flask_security_bundle/forms.py:78
+#: flask_security_bundle/forms.py:32 flask_security_bundle/forms.py:83
 msgid "flask_security_bundle.error.user_does_not_exist"
 msgstr "Specified user does not exist."
 
-#: flask_security_bundle/forms.py:52 flask_security_bundle/forms.py:106
-#: flask_security_bundle/forms.py:153 flask_security_bundle/forms.py:185
+#: flask_security_bundle/forms.py:48
+msgid "flask_security_bundle.error.invalid_next_redirect"
+msgstr "Redirections outside the domain are forbidden"
+
+#: flask_security_bundle/forms.py:57 flask_security_bundle/forms.py:111
+#: flask_security_bundle/forms.py:156 flask_security_bundle/forms.py:182
 msgid "flask_security_bundle.form_field.email"
 msgstr "Email"
 
-#: flask_security_bundle/forms.py:53 flask_security_bundle/forms.py:112
+#: flask_security_bundle/forms.py:58 flask_security_bundle/forms.py:117
+#: flask_security_bundle/forms.py:129
 msgid "flask_security_bundle.form_field.password"
 msgstr "Password"
 
-#: flask_security_bundle/forms.py:54
+#: flask_security_bundle/forms.py:59
 msgid "flask_security_bundle.form_field.remember_me"
 msgstr "Remember me?"
 
-#: flask_security_bundle/forms.py:55
+#: flask_security_bundle/forms.py:60
 msgid "flask_security_bundle.form_submit.login"
 msgstr "Login"
 
-#: flask_security_bundle/forms.py:82
+#: flask_security_bundle/forms.py:87
 msgid "flask_security_bundle.error.password_not_set"
 msgstr "No password is set for this user."
 
-#: flask_security_bundle/forms.py:86 flask_security_bundle/forms.py:140
+#: flask_security_bundle/forms.py:91 flask_security_bundle/forms.py:143
 msgid "flask_security_bundle.error.invalid_password"
 msgstr "Invalid password."
 
-#: flask_security_bundle/forms.py:92
-#: flask_security_bundle/services/security_service.py:51
+#: flask_security_bundle/forms.py:97
+#: flask_security_bundle/services/security_service.py:83
 msgid "flask_security_bundle.error.confirmation_required"
 msgstr "Email requires confirmation."
 
-#: flask_security_bundle/forms.py:96
-#: flask_security_bundle/services/security_service.py:50
+#: flask_security_bundle/forms.py:101
+#: flask_security_bundle/services/security_service.py:82
 msgid "flask_security_bundle.error.disabled_account"
 msgstr "Account is disabled."
 
-#: flask_security_bundle/forms.py:108
+#: flask_security_bundle/forms.py:113
 msgid "flask_security_bundle.form_submit.recover_password"
 msgstr "Recover Password"
 
-#: flask_security_bundle/forms.py:117 flask_security_bundle/forms.py:130
+#: flask_security_bundle/forms.py:119 flask_security_bundle/forms.py:133
 msgid "flask_security_bundle.form_field.retype_password"
 msgstr "Retype Password"
 
-#: flask_security_bundle/forms.py:128
+#: flask_security_bundle/forms.py:131
 msgid "flask_security_bundle.form_field.new_password"
 msgstr "New Password"
 
-#: flask_security_bundle/forms.py:133
+#: flask_security_bundle/forms.py:136
 msgid "flask_security_bundle.form_submit.change_password"
 msgstr "Change Password"
 
-#: flask_security_bundle/forms.py:144
+#: flask_security_bundle/forms.py:147
 msgid "flask_security_bundle.error.password_is_the_same"
 msgstr "Your new password must be different than your previous password."
 
-#: flask_security_bundle/forms.py:156
+#: flask_security_bundle/forms.py:159
 msgid "flask_security_bundle.form_submit.register"
 msgstr "Register"
 
-#: flask_security_bundle/forms.py:177
+#: flask_security_bundle/forms.py:174
 msgid "flask_security_bundle.form_submit.reset_password"
 msgstr "Reset Password"
 
-#: flask_security_bundle/forms.py:187
+#: flask_security_bundle/forms.py:184
 msgid "flask_security_bundle.form_submit.send_confirmation"
 msgstr "Resend Confirmation Instructions"
 
-#: flask_security_bundle/forms.py:199
+#: flask_security_bundle/forms.py:196
 msgid "flask_security_bundle.error.already_confirmed"
 msgstr "Your email has already been confirmed."
 
-#: flask_security_bundle/validators.py:32
+#: flask_security_bundle/validators.py:34
 msgid "flask_security_bundle.email_invalid"
 msgstr "Invalid email address."
 
-#: flask_security_bundle/models/user.py:17
+#: flask_security_bundle/extensions/security.py:133
+msgid "flask_security_bundle.error.login_required"
+msgstr "Please login to access this page."
+
+#: flask_security_bundle/extensions/security.py:135
+msgid "flask_security_bundle.error.fresh_login_required"
+msgstr "Please re-authenticate to access this page."
+
+#: flask_security_bundle/models/user.py:41
 msgid "flask_security_bundle.email_required"
 msgstr "Email is required."
 
-#: flask_security_bundle/models/user.py:20
+#: flask_security_bundle/models/user.py:44
 msgid "flask_security_bundle.password_required"
 msgstr "Password is required."
 
-#: flask_security_bundle/services/security_service.py:102
+#: flask_security_bundle/services/security_service.py:139
 msgid "flask_security_bundle.email_subject.register"
 msgstr "Welcome!"
 
-#: flask_security_bundle/services/security_service.py:117
+#: flask_security_bundle/services/security_service.py:156
 msgid "flask_security_bundle.email_subject.password_changed_notice"
 msgstr "Your password has been changed."
 
-#: flask_security_bundle/services/security_service.py:127
+#: flask_security_bundle/services/security_service.py:168
 msgid "flask_security_bundle.email_subject.reset_password_instructions_notice"
 msgstr "Your password has been reset."
 
-#: flask_security_bundle/services/security_service.py:144
+#: flask_security_bundle/services/security_service.py:185
 msgid "flask_security_bundle.email_subject.email_confirmation_instructions"
 msgstr "Please confirm your email"
 
-#: flask_security_bundle/services/security_service.py:164
+#: flask_security_bundle/services/security_service.py:204
 msgid "flask_security_bundle.email_subject.reset_password_instructions"
 msgstr "Password reset instructions"
 
-#: flask_security_bundle/templates/security/change_password.html:5
+#: flask_security_bundle/templates/security/change_password.html:7
 msgid "flask_security_bundle.heading.change_password"
 msgstr "Change Password"
 
-#: flask_security_bundle/templates/security/forgot_password.html:5
+#: flask_security_bundle/templates/security/forgot_password.html:7
 msgid "flask_security_bundle.heading.forgot_password"
 msgstr "Forgot Password?"
 
-#: flask_security_bundle/templates/security/login.html:5
+#: flask_security_bundle/templates/security/login.html:7
 msgid "flask_security_bundle.heading.login"
 msgstr "Login"
 
-#: flask_security_bundle/templates/security/register.html:5
+#: flask_security_bundle/templates/security/register.html:7
 msgid "flask_security_bundle.heading.register"
 msgstr "Register"
 
-#: flask_security_bundle/templates/security/reset_password.html:5
+#: flask_security_bundle/templates/security/reset_password.html:7
 msgid "flask_security_bundle.heading.reset_password"
 msgstr "Reset Password"
 
-#: flask_security_bundle/templates/security/send_confirmation_email.html:5
+#: flask_security_bundle/templates/security/send_confirmation_email.html:7
 msgid "flask_security_bundle.heading.send_confirmation_email"
 msgstr "Resend Confirmation Email"
 
-#: flask_security_bundle/views/security_controller.py:37
+#: flask_security_bundle/views/security_controller.py:41
 msgid "flask_security_bundle.flash.login"
 msgstr "Welcome %(user)s!"
 
-#: flask_security_bundle/views/security_controller.py:58
+#: flask_security_bundle/views/security_controller.py:63
 msgid "flask_security_bundle.flash.logout"
 msgstr "You have been successfully logged out."
 
-#: flask_security_bundle/views/security_controller.py:88
+#: flask_security_bundle/views/security_controller.py:89
 msgid "flask_security_bundle.flash.confirmation_request"
 msgstr "Confirmation instructions have been sent to %(email)s."
 
@@ -173,41 +186,41 @@ msgstr "Confirmation instructions have been sent to %(email)s."
 msgid "flask_security_bundle.flash.invalid_confirmation_token"
 msgstr "Invalid confirmation token."
 
-#: flask_security_bundle/views/security_controller.py:116
+#: flask_security_bundle/views/security_controller.py:115
 msgid "flask_security_bundle.flash.confirmation_expired"
 msgstr ""
 "You did not confirm your email within %(within)s. New instructions to "
 "confirm your email have been sent to %(email)s."
 
-#: flask_security_bundle/views/security_controller.py:125
+#: flask_security_bundle/views/security_controller.py:124
 msgid "flask_security_bundle.flash.email_confirmed"
 msgstr "Thank you. Your email has been confirmed."
 
-#: flask_security_bundle/views/security_controller.py:128
+#: flask_security_bundle/views/security_controller.py:127
 msgid "flask_security_bundle.flash.already_confirmed"
 msgstr "Your email has already been confirmed."
 
-#: flask_security_bundle/views/security_controller.py:147
+#: flask_security_bundle/views/security_controller.py:145
 msgid "flask_security_bundle.flash.password_reset_request"
 msgstr "Instructions to reset your password have been sent to %(email)s."
 
-#: flask_security_bundle/views/security_controller.py:166
+#: flask_security_bundle/views/security_controller.py:163
 msgid "flask_security_bundle.flash.invalid_reset_password_token"
 msgstr "Invalid reset password token."
 
-#: flask_security_bundle/views/security_controller.py:173
+#: flask_security_bundle/views/security_controller.py:170
 msgid "flask_security_bundle.flash.password_reset_expired"
 msgstr ""
 "You did not reset your password within %(within)s. New instructions have "
 "been sent to %(email)s."
 
-#: flask_security_bundle/views/security_controller.py:186
+#: flask_security_bundle/views/security_controller.py:183
 msgid "flask_security_bundle.flash.password_reset"
 msgstr ""
 "You successfully reset your password and you have been logged in "
 "automatically."
 
-#: flask_security_bundle/views/security_controller.py:213
+#: flask_security_bundle/views/security_controller.py:209
 msgid "flask_security_bundle.flash.password_change"
 msgstr "You successfully changed your password."
 
