@@ -1,3 +1,4 @@
+from flask_login import AnonymousUserMixin
 from flask_unchained.bundles.sqlalchemy import db
 from flask_unchained import lazy_gettext as _
 from werkzeug.datastructures import ImmutableList
@@ -9,7 +10,7 @@ from ..validators import EmailValidator
 MIN_PASSWORD_LENGTH = 8
 
 
-class AnonymousUser:
+class AnonymousUser(AnonymousUserMixin):
     def __init__(self):
         self.roles = ImmutableList()
 
@@ -23,14 +24,6 @@ class AnonymousUser:
 
     def has_role(self, *args):
         return False
-
-    @property
-    def is_authenticated(self):
-        return False
-
-    @property
-    def is_anonymous(self):
-        return True
 
 
 class User(db.Model):
