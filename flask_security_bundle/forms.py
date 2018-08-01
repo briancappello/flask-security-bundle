@@ -91,7 +91,7 @@ class LoginForm(BaseForm, NextFormMixin):
             self.email.errors.append(
                 _('flask_security_bundle.error.confirmation_required'))
             return False
-        if not self.user.is_active:
+        if not self.user.active:
             self.email.errors.append(
                 _('flask_security_bundle.error.disabled_account'))
             return False

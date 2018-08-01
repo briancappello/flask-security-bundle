@@ -1,15 +1,39 @@
-from flask_security import UserMixin
-from flask_security.utils import hash_password as security_hash_password
 from flask_unchained.bundles.sqlalchemy import db
 from flask_unchained import lazy_gettext as _
+from werkzeug.datastructures import ImmutableList
 
 from .user_role import UserRole
+from ..utils import hash_password as security_hash_password, get_auth_token
 from ..validators import EmailValidator
 
 MIN_PASSWORD_LENGTH = 8
 
 
-class User(db.Model, UserMixin):
+class AnonymousUser:
+    def __init__(self):
+        self.roles = ImmutableList()
+
+    @property
+    def id(self):
+        return None
+
+    @property
+    def active(self):
+        return False
+
+    def has_role(self, *args):
+        return False
+
+    @property
+    def is_authenticated(self):
+        return False
+
+    @property
+    def is_anonymous(self):
+        return True
+
+
+class User(db.Model):
     class Meta:
         lazy_mapped = True
 
@@ -41,3 +65,24 @@ class User(db.Model, UserMixin):
         if password and len(password) < MIN_PASSWORD_LENGTH:
             raise db.ValidationError(f'Password must be at least '
                                      f'{MIN_PASSWORD_LENGTH} characters long.')
+
+    def get_auth_token(self):
+        """Returns the user's authentication token."""
+        return get_auth_token(self)
+
+    def has_role(self, role):
+        """Returns `True` if the user identifies with the specified role.
+
+        :param role: A role name or `Role` instance"""
+        if isinstance(role, str):
+            return role in (role.name for role in self.roles)
+        else:
+            return role in self.roles
+
+    @property
+    def is_authenticated(self):
+        return True
+
+    @property
+    def is_anonymous(self):
+        return False

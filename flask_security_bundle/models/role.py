@@ -1,10 +1,9 @@
-from flask_security import RoleMixin
 from flask_unchained.bundles.sqlalchemy import db
 
 from .user_role import UserRole
 
 
-class Role(db.Model, RoleMixin):
+class Role(db.Model):
     class Meta:
         lazy_mapped = True
 
@@ -16,3 +15,6 @@ class Role(db.Model, RoleMixin):
                                  creator=lambda user: UserRole(user=user))
 
     __repr_props__ = ('id', 'name')
+
+    def __hash__(self):
+        return hash(self.name)

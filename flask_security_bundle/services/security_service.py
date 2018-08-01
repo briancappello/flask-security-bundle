@@ -1,4 +1,7 @@
-from flask import current_app as app
+from flask import _request_ctx_stack, current_app as app, session
+from flask_login.signals import user_logged_in
+from flask_login.utils import _get_user, logout_user as _logout_user
+from flask_principal import Identity, AnonymousIdentity, identity_changed
 from flask_unchained import url_for, lazy_gettext as _
 from flask_unchained.bundles.mail import Mail
 from flask_security.confirmable import (
@@ -15,10 +18,6 @@ from flask_security.signals import (
     user_confirmed,
     user_registered,
 )
-from flask_security.utils import (
-    login_user as security_login_user,
-    logout_user as security_logout_user,
-)
 from flask_unchained import BaseService, injectable
 
 from .user_manager import UserManager
@@ -34,13 +33,57 @@ class SecurityService(BaseService):
         self.security = security
         self.user_manager = user_manager
 
-    def login_user(self, user, remember=None):
+    def login_user(self, user, remember=None, duration=None, force=False, fresh=True):
         """
-        sends signal identity_changed (from flask_principal)
+        Logs a user in. You should pass the actual user object to this. If the
+        user's `active` property is ``False``, they will not be logged in
+        unless `force` is ``True``.
 
-        Returns True if the user was successfully logged in, False otherwise
+        This will return ``True`` if the log in attempt succeeds, and ``False`` if
+        it fails (i.e. because the user is inactive).
+
+        :param user: The user object to log in.
+        :type user: object
+        :param remember: Whether to remember the user after their session expires.
+            Defaults to ``False``.
+        :type remember: bool
+        :param duration: The amount of time before the remember cookie expires. If
+            ``None`` the value set in the settings is used. Defaults to ``None``.
+        :type duration: :class:`datetime.timedelta`
+        :param force: If the user is inactive, setting this to ``True`` will log
+            them in regardless. Defaults to ``False``.
+        :type force: bool
+        :param fresh: setting this to ``False`` will log in the user with a session
+            marked as not "fresh". Defaults to ``True``.
+        :type fresh: bool
         """
-        return security_login_user(user, remember)
+        if not force and not user.active:
+            return False
+
+        session['user_id'] = getattr(user, user.Meta.pk)
+        session['_fresh'] = fresh
+        session['_id'] = app.login_manager._session_identifier_generator()
+
+        if remember is None:
+            remember = app.config.get('SECURITY_DEFAULT_REMEMBER_ME')
+        if remember:
+            session['remember'] = 'set'
+            if duration is not None:
+                try:
+                    # equal to timedelta.total_seconds() but works with Python 2.6
+                    session['remember_seconds'] = (duration.microseconds +
+                                                   (duration.seconds +
+                                                    duration.days * 24 * 3600) *
+                                                   10 ** 6) / 10.0 ** 6
+                except AttributeError:
+                    raise Exception('duration must be a datetime.timedelta, '
+                                    'instead got: {0}'.format(duration))
+
+        _request_ctx_stack.top.user = user
+        user_logged_in.send(app._get_current_object(), user=_get_user())
+        identity_changed.send(app._get_current_object(),
+                              identity=Identity(user.id))
+        return True
 
     def process_login_errors(self, form):
         """
@@ -70,7 +113,12 @@ class SecurityService(BaseService):
         sends signal identity_changed (from flask_principal)
         sends signal user_logged_out (from flask_login)
         """
-        return security_logout_user()
+
+        for key in ('identity.name', 'identity.auth_type'):
+            session.pop(key, None)
+        identity_changed.send(app._get_current_object(),
+                              identity=AnonymousIdentity())
+        _logout_user()
 
     def register_user(self, user):
         """

@@ -19,6 +19,7 @@ from .decorators import (
     auth_required,
     auth_required_same_user,
 )
+from .models import AnonymousUser, User, Role, UserRole
 from .services import SecurityService, UserManager, RoleManager
 from .views import SecurityController, UserResource
 

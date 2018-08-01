@@ -1,6 +1,5 @@
 from datetime import datetime, timezone
 from flask import abort
-from flask_security import AnonymousUser
 from http import HTTPStatus
 
 from .forms import (
@@ -12,6 +11,7 @@ from .forms import (
     ChangePasswordForm,
     SendConfirmationForm,
 )
+from .models import AnonymousUser
 
 
 class Config:
