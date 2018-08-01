@@ -1,36 +1,33 @@
 import inspect
 
 from flask import current_app as app, request
-from flask_security.forms import (
-    EqualTo,
-    Field,
-    NextFormMixin,
-    StringField,
-    SubmitField,
-    _datastore,
-)
+from flask_unchained.bundles.controller.utils import _validate_redirect_url
 from flask_unchained.bundles.sqlalchemy import ModelForm
 from flask_unchained import unchained, injectable, lazy_gettext as _
-from wtforms import ValidationError, fields
+from wtforms import (Field, HiddenField, StringField, SubmitField, ValidationError,
+                     fields, validators)
 
-from .services import SecurityService
+from .services import SecurityService, UserManager
 from .utils import current_user, verify_and_update_password
 
 
-password_equal = EqualTo(
-    'password', message=_('flask_security_bundle.error.retype_password_mismatch'))
-new_password_equal = EqualTo(
-    'new_password', message=_('flask_security_bundle.error.retype_password_mismatch'))
+password_equal = validators.EqualTo('password', message=_(
+    'flask_security_bundle.error.retype_password_mismatch'))
+new_password_equal = validators.EqualTo('new_password', message=_(
+    'flask_security_bundle.error.retype_password_mismatch'))
 
 
-def unique_user_email(form, field):
-    if _datastore.get_user(field.data) is not None:
-        msg = _('flask_security_bundle.error.email_already_associated', email=field.data)
+@unchained.inject('user_manager')
+def unique_user_email(form, field, user_manager: UserManager = injectable):
+    if user_manager.get_by(email=field.data) is not None:
+        msg = _('flask_security_bundle.error.email_already_associated',
+                email=field.data)
         raise ValidationError(msg)
 
 
-def valid_user_email(form, field):
-    form.user = _datastore.get_user(field.data)
+@unchained.inject('user_manager')
+def valid_user_email(form, field, user_manager: UserManager = injectable):
+    form.user = user_manager.get_by(email=field.data)
     if form.user is None:
         raise ValidationError(_('flask_security_bundle.error.user_does_not_exist'))
 
@@ -40,6 +37,16 @@ class BaseForm(ModelForm):
         if app.testing:
             self.TIME_LIMIT = None
         super().__init__(*args, **kwargs)
+
+
+class NextFormMixin:
+    next = HiddenField()
+
+    def validate_next(self, field):
+        if field.data and not _validate_redirect_url(field.data):
+            field.data = ''
+            raise ValidationError(_(
+                'flask_security_bundle.error.invalid_next_redirect'))
 
 
 @unchained.inject('security_service')
@@ -154,8 +161,7 @@ class RegisterForm(BaseForm, PasswordFormMixin, NextFormMixin):
 
     def to_dict(self):
         def is_field_and_user_attr(member):
-            return isinstance(member, Field) and \
-                hasattr(_datastore.user_model, member.name)
+            return isinstance(member, Field) and hasattr(self.Meta.model, member.name)
 
         fields = inspect.getmembers(self, is_field_and_user_attr)
         return dict((key, value.data) for key, value in fields)

@@ -12,6 +12,7 @@
 * do not depend on signals from flask_security
 * do not depend on `auth_required` decorator from flask_security
 * do not depend on `flask_security.core` module
+* do not depend on `flask_security.forms` module
 * refactor register form to always require password confirmation
 
 ## 0.3.0 (2018/07/25)
