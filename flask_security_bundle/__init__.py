@@ -26,14 +26,3 @@ from .views import SecurityController, UserResource
 class FlaskSecurityBundle(Bundle):
     blueprint_names = []
     command_group_names = ['users', 'roles']
-
-    @classmethod
-    def after_init_app(cls, app):
-        from flask_wtf.csrf import generate_csrf
-
-        # send CSRF token in the cookie
-        @app.after_request
-        def set_csrf_cookie(response):
-            if response:
-                response.set_cookie('csrf_token', generate_csrf())
-            return response

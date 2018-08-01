@@ -5,6 +5,7 @@
 * automatically send the csrf token in the response cookie
 * use the default behavior of controllers to name endpoints (in effect, rename the prefixes from `security` to `security_controller`)
 * rename a translations keys for template h1 headings
+* move setting of the `csrf_token` cookie to flask unchained's controller bundle
 
 ## 0.3.0 (2018/07/25)
 
