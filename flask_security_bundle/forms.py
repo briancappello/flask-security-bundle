@@ -7,9 +7,8 @@ from flask_unchained import unchained, injectable, lazy_gettext as _
 from wtforms import (Field, HiddenField, StringField, SubmitField, ValidationError,
                      fields, validators)
 
-from .services import SecurityService, UserManager
-from .utils import (
-    current_user, user_loader, get_identity_attributes, verify_and_update_password)
+from .services import SecurityService, SecurityUtilsService, UserManager
+from .utils import current_user
 
 
 password_equal = validators.EqualTo('password', message=_(
@@ -50,7 +49,7 @@ class NextFormMixin:
                 'flask_security_bundle.error.invalid_next_redirect'))
 
 
-@unchained.inject('security_service')
+@unchained.inject('security_service', 'security_utils_service')
 class LoginForm(BaseForm, NextFormMixin):
     """The default login form"""
     class Meta:
@@ -61,10 +60,13 @@ class LoginForm(BaseForm, NextFormMixin):
     remember = fields.BooleanField(_('flask_security_bundle.form_field.remember_me'))
     submit = fields.SubmitField(_('flask_security_bundle.form_submit.login'))
 
-    def __init__(self, *args, security_service: SecurityService = injectable,
+    def __init__(self, *args,
+                 security_service: SecurityService = injectable,
+                 security_utils_service: SecurityUtilsService = injectable,
                  **kwargs):
         super().__init__(*args, **kwargs)
         self.security_service = security_service
+        self.security_utils_service = security_utils_service
         self.user = None
 
         if not self.next.data:
@@ -74,10 +76,11 @@ class LoginForm(BaseForm, NextFormMixin):
     def validate(self):
         if not super().validate():
             # FIXME-identity
-            if set(self.errors.keys()) - set(get_identity_attributes()):
+            if (set(self.errors.keys()) -
+                    set(self.security_utils_service.get_identity_attributes())):
                 return False
 
-        self.user = user_loader(self.email.data)
+        self.user = self.security_utils_service.user_loader(self.email.data)
 
         if self.user is None:
             self.email.errors.append(
@@ -87,7 +90,8 @@ class LoginForm(BaseForm, NextFormMixin):
             self.password.errors.append(
                 _('flask_security_bundle.error.password_not_set'))
             return False
-        if not verify_and_update_password(self.password.data, self.user):
+        if not self.security_utils_service.verify_and_update_password(
+                self.password.data, self.user):
             self.password.errors.append(
                 _('flask_security_bundle.error.invalid_password'))
             return False
@@ -121,6 +125,7 @@ class PasswordFormMixin:
         validators=[password_equal])
 
 
+@unchained.inject('security_utils_service')
 class ChangePasswordForm(BaseForm):
     class Meta:
         model = 'User'
@@ -136,10 +141,16 @@ class ChangePasswordForm(BaseForm):
 
     submit = fields.SubmitField(_('flask_security_bundle.form_submit.change_password'))
 
+    def __init__(self, *args, security_utils_service: SecurityUtilsService = injectable,
+                 **kwargs):
+        super().__init__(*args, **kwargs)
+        self.security_utils_service = security_utils_service
+
     def validate(self):
         result = super().validate()
 
-        if not verify_and_update_password(self.password.data, current_user):
+        if not self.security_utils_service.verify_and_update_password(
+                self.password.data, current_user):
             self.password.errors.append(
                 _('flask_security_bundle.error.invalid_password'))
             return False

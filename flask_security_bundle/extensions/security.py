@@ -9,7 +9,8 @@ from types import FunctionType
 from typing import *
 
 from ..models import AnonymousUser, User
-from ..utils import current_user, user_loader, verify_hash
+from ..utils import current_user
+from ..services.security_utils_service import SecurityUtilsService
 from ..services.user_manager import UserManager
 
 
@@ -41,6 +42,7 @@ class Security(_SecurityConfigProperties):
         self._send_mail_task = None
 
         # injected services
+        self.security_utils_service = None
         self.user_manager = None
 
         # remaining properties are all set by `self.init_app`
@@ -54,7 +56,11 @@ class Security(_SecurityConfigProperties):
         self.remember_token_serializer = None
         self.reset_serializer = None
 
-    def inject_services(self, user_manager: UserManager = injectable):
+    def inject_services(self,
+                        security_utils_service: SecurityUtilsService = injectable,
+                        user_manager: UserManager = injectable,
+                        ):
+        self.security_utils_service = security_utils_service
         self.user_manager = user_manager
 
     def init_app(self, app: FlaskUnchained):
@@ -139,7 +145,8 @@ class Security(_SecurityConfigProperties):
         lm.anonymous_user = anonymous_user or AnonymousUser
         lm.localize_callback = _
         lm.request_loader(self._request_loader)
-        lm.user_loader(user_loader)
+        lm.user_loader(
+            lambda *a, **kw: self.security_utils_service.user_loader(*a, **kw))
         lm.login_view = 'security_controller.login'
         lm.login_message, _('flask_security_bundle.error.login_required')
         lm.login_message_category = 'info'
@@ -205,7 +212,7 @@ class Security(_SecurityConfigProperties):
             data = self.remember_token_serializer.loads(
                 token, max_age=self.token_max_age)
             user = self.user_manager.get(data[0])
-            if user and verify_hash(data[1], user.password):
+            if user and self.security_utils_service.verify_hash(data[1], user.password):
                 return user
         except:
             pass

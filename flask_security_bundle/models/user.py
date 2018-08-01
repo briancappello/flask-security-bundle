@@ -1,10 +1,9 @@
 from flask_login import AnonymousUserMixin
 from flask_unchained.bundles.sqlalchemy import db
-from flask_unchained import lazy_gettext as _
+from flask_unchained import unchained, injectable, lazy_gettext as _
 from werkzeug.datastructures import ImmutableList
 
 from .user_role import UserRole
-from ..utils import hash_password as security_hash_password, get_auth_token
 from ..validators import EmailValidator
 
 MIN_PASSWORD_LENGTH = 8
@@ -50,8 +49,9 @@ class User(db.Model):
         return self._password
 
     @password.setter
-    def password(self, password):
-        self._password = security_hash_password(password)
+    @unchained.inject('security_utils_service')
+    def password(self, password, security_utils_service=injectable):
+        self._password = security_utils_service.hash_password(password)
 
     @classmethod
     def validate_password(cls, password):
@@ -59,9 +59,10 @@ class User(db.Model):
             raise db.ValidationError(f'Password must be at least '
                                      f'{MIN_PASSWORD_LENGTH} characters long.')
 
-    def get_auth_token(self):
+    @unchained.inject('security_utils_service')
+    def get_auth_token(self, security_utils_service=injectable):
         """Returns the user's authentication token."""
-        return get_auth_token(self)
+        return security_utils_service.get_auth_token(self)
 
     def has_role(self, role):
         """Returns `True` if the user identifies with the specified role.

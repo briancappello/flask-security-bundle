@@ -7,6 +7,7 @@
 * rename a translations keys for template h1 headings
 * rename email templates and service methods for consistency
 * refactor register form to always require password confirmation
+* refactor security utilities to be an injectable service
 
 ## 0.3.0 (2018/07/25)
 

@@ -1,3 +1,4 @@
+from datetime import timedelta
 from flask import _request_ctx_stack, current_app as app, session
 from flask_login.signals import user_logged_in
 from flask_login.utils import _get_user, logout_user as _logout_user
@@ -5,25 +6,34 @@ from flask_principal import Identity, AnonymousIdentity, identity_changed
 from flask_unchained import url_for, lazy_gettext as _
 from flask_unchained.bundles.mail import Mail
 from flask_unchained import BaseService, injectable
+from typing import *
 
+from .security_utils_service import SecurityUtilsService
 from .user_manager import UserManager
 from ..extensions import Security
 from ..models import User
 from ..signals import (confirm_instructions_sent, reset_password_instructions_sent,
                        password_changed, password_reset, user_confirmed, user_registered)
-from ..utils import generate_confirmation_token, generate_reset_password_token
 
 
 class SecurityService(BaseService):
     def __init__(self,
                  mail: Mail = injectable,
                  security: Security = injectable,
+                 security_utils_service: SecurityUtilsService = injectable,
                  user_manager: UserManager = injectable):
         self.mail = mail
         self.security = security
+        self.security_utils_service = security_utils_service
         self.user_manager = user_manager
 
-    def login_user(self, user: User, remember=None, duration=None, force=False, fresh=True):
+    def login_user(self,
+                   user: User,
+                   remember: Optional[bool] = None,
+                   duration: Optional[timedelta] = None,
+                   force: bool = False,
+                   fresh: bool = True,
+                   ) -> bool:
         """
         Logs a user in. You should pass the actual user object to this. If the
         user's `active` property is ``False``, they will not be logged in
@@ -133,7 +143,7 @@ class SecurityService(BaseService):
 
         confirmation_link, token = None, None
         if self.security.confirmable:
-            token = generate_confirmation_token(user)
+            token = self.security_utils_service.generate_confirmation_token(user)
             confirmation_link = url_for('security_controller.confirm_email',
                                         token=token, _external=True)
 
@@ -183,7 +193,7 @@ class SecurityService(BaseService):
 
         :param user: The user to send the instructions to
         """
-        token = generate_confirmation_token(user)
+        token = self.security_utils_service.generate_confirmation_token(user)
         confirmation_link = url_for('security_controller.confirm_email',
                                     token=token, _external=True)
         self.send_mail(
@@ -202,7 +212,7 @@ class SecurityService(BaseService):
 
         :param user: The user to send the instructions to
         """
-        token = generate_reset_password_token(user)
+        token = self.security_utils_service.generate_reset_password_token(user)
         reset_link = url_for('security_controller.reset_password',
                              token=token, _external=True)
         self.send_mail(

@@ -7,17 +7,19 @@ from werkzeug.datastructures import MultiDict
 
 from ..decorators import anonymous_user_required, auth_required
 from ..extensions import Security
-from ..services import SecurityService
-from ..utils import current_user, confirm_email_token_status, reset_password_token_status
+from ..services import SecurityService, SecurityUtilsService
+from ..utils import current_user
 
 
 class SecurityController(Controller):
     def __init__(self,
                  security: Security = injectable,
                  security_service: SecurityService = injectable,
+                 security_utils_service: SecurityUtilsService = injectable,
                  session_manager: SessionManager = injectable):
         self.security = security
         self.security_service = security_service
+        self.security_utils_service = security_utils_service
         self.session_manager = session_manager
 
     # require check_auth_token to be explicitly enabled
@@ -101,7 +103,8 @@ class SecurityController(Controller):
     @route('/confirm/<token>',
            only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
     def confirm_email(self, token):
-        expired, invalid, user = confirm_email_token_status(token)
+        expired, invalid, user = \
+            self.security_utils_service.confirm_email_token_status(token)
         if not user or invalid:
             invalid = True
             self.flash(_('flask_security_bundle.flash.invalid_confirmation_token'),
@@ -158,7 +161,8 @@ class SecurityController(Controller):
            only_if=lambda app: app.config.get('SECURITY_RECOVERABLE'))
     @anonymous_user_required
     def reset_password(self, token):
-        expired, invalid, user = reset_password_token_status(token)
+        expired, invalid, user = \
+            self.security_utils_service.reset_password_token_status(token)
         if invalid:
             self.flash(_('flask_security_bundle.flash.invalid_reset_password_token'),
                        category='error')
