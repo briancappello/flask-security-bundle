@@ -2,18 +2,21 @@ from flask import current_app as app, request
 from flask_unchained import Controller, route, lazy_gettext as _
 from flask_security.confirmable import confirm_email_token_status
 from flask_security.recoverable import reset_password_token_status
-from flask_security.views import _ctx as security_template_ctx
 from flask_unchained import injectable
 from http import HTTPStatus
 from werkzeug.datastructures import MultiDict
 
 from ..decorators import anonymous_user_required, auth_required
+from ..extensions import Security
 from ..services import SecurityService
 from ..utils import current_user
 
 
 class SecurityController(Controller):
-    def __init__(self, security_service: SecurityService = injectable):
+    def __init__(self,
+                 security: Security = injectable,
+                 security_service: SecurityService = injectable):
+        self.security = security
         self.security_service = security_service
 
     # require check_auth_token to be explicitly enabled
@@ -46,7 +49,7 @@ class SecurityController(Controller):
 
         return self.render('login',
                            login_user_form=form,
-                           **security_template_ctx('login'))
+                           **self.security._run_ctx_processor('login'))
 
     @route()
     def logout(self):
@@ -71,7 +74,7 @@ class SecurityController(Controller):
 
         return self.render('register',
                            register_user_form=form,
-                           **security_template_ctx('register'))
+                           **self.security._run_ctx_processor('register'))
 
     @route(methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
@@ -92,7 +95,7 @@ class SecurityController(Controller):
 
         return self.render('send_confirmation_email',
                            send_confirmation_form=form,
-                           **security_template_ctx('send_confirmation'))
+                           **self.security._run_ctx_processor('send_confirmation'))
 
     @route('/confirm/<token>',
            only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
@@ -148,7 +151,7 @@ class SecurityController(Controller):
 
         return self.render('forgot_password',
                            forgot_password_form=form,
-                           **security_template_ctx('forgot_password'))
+                           **self.security._run_ctx_processor('forgot_password'))
 
     @route('/reset-password/<string:token>', methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_RECOVERABLE'))
@@ -190,7 +193,7 @@ class SecurityController(Controller):
         return self.render('reset_password',
                            reset_password_form=form,
                            reset_password_token=token,
-                           **security_template_ctx('reset_password'))
+                           **self.security._run_ctx_processor('reset_password'))
 
     @route(methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_CHANGEABLE'))
@@ -214,7 +217,7 @@ class SecurityController(Controller):
 
         return self.render('change_password',
                            change_password_form=form,
-                           **security_template_ctx('change_password'))
+                           **self.security._run_ctx_processor('change_password'))
 
     def _get_form(self, name):
         form_cls = app.config.get(name)
