@@ -1,7 +1,5 @@
 from flask import current_app as app, request
 from flask_unchained import Controller, route, lazy_gettext as _
-from flask_security.confirmable import confirm_email_token_status
-from flask_security.recoverable import reset_password_token_status
 from flask_unchained import injectable
 from http import HTTPStatus
 from werkzeug.datastructures import MultiDict
@@ -9,7 +7,7 @@ from werkzeug.datastructures import MultiDict
 from ..decorators import anonymous_user_required, auth_required
 from ..extensions import Security
 from ..services import SecurityService
-from ..utils import current_user
+from ..utils import current_user, confirm_email_token_status, reset_password_token_status
 
 
 class SecurityController(Controller):
