@@ -1,8 +1,10 @@
-from flask_security.decorators import auth_required as security_auth_required
+from flask import _request_ctx_stack, current_app, request
+from flask_principal import Identity, identity_changed
 from functools import wraps
 
 from .roles_accepted import roles_accepted
 from .roles_required import roles_required
+from ..utils import _security, current_user
 
 
 def auth_required(*decorator_args, **decorator_kwargs):
@@ -34,7 +36,7 @@ def auth_required(*decorator_args, **decorator_kwargs):
 
     def wrapper(fn):
         @wraps(fn)
-        @security_auth_required('session', 'token')
+        @_auth_required('session', 'token')
         @roles_required(*required_roles)
         @roles_accepted(*one_of_roles)
         def decorated(*args, **kwargs):
@@ -44,3 +46,45 @@ def auth_required(*decorator_args, **decorator_kwargs):
     if decorator_args and callable(decorator_args[0]):
         return wrapper(decorator_args[0])
     return wrapper
+
+
+def _auth_required(*auth_methods):
+    """
+    Decorator that protects enpoints through multiple mechanisms
+    Example::
+
+        @app.route('/dashboard')
+        @auth_required('token', 'session')
+        def dashboard():
+            return 'Dashboard'
+
+    :param auth_methods: Specified mechanisms.
+    """
+    login_mechanisms = {
+        'token': lambda: _check_token(),
+        'session': lambda: current_user.is_authenticated
+    }
+
+    def wrapper(fn):
+        @wraps(fn)
+        def decorated_view(*args, **kwargs):
+            mechanisms = [(method, login_mechanisms.get(method))
+                          for method in auth_methods]
+            for method, mechanism in mechanisms:
+                if mechanism and mechanism():
+                    return fn(*args, **kwargs)
+            return _security._unauthorized_callback()
+        return decorated_view
+    return wrapper
+
+
+def _check_token():
+    user = _security.login_manager.request_callback(request)
+
+    if user and user.is_authenticated:
+        app = current_app._get_current_object()
+        _request_ctx_stack.top.user = user
+        identity_changed.send(app, identity=Identity(user.id))
+        return True
+
+    return False
