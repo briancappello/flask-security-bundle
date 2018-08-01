@@ -1,6 +1,6 @@
 import pytest
 
-from flask_security import current_user
+from flask_security_bundle import current_user
 
 
 @pytest.mark.usefixtures('user')

@@ -1,6 +1,6 @@
 import pytest
 
-from flask_security import AnonymousUser, current_user
+from flask_security_bundle import AnonymousUser, current_user
 
 
 NEW_USER_DATA = dict(username='new',

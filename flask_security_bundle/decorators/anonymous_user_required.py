@@ -1,8 +1,9 @@
 from flask import abort, flash, request
 from flask_unchained import redirect
-from flask_security import current_user
 from functools import wraps
 from http import HTTPStatus
+
+from ..utils import current_user
 
 
 def anonymous_user_required(*decorator_args,

@@ -11,7 +11,6 @@
 __version__ = '0.3.0'
 
 
-from flask_security import current_user  # alias this here
 from flask_unchained import Bundle
 
 from .decorators import (
@@ -21,6 +20,7 @@ from .decorators import (
 )
 from .models import AnonymousUser, User, Role, UserRole
 from .services import SecurityService, UserManager, RoleManager
+from .utils import current_user
 from .views import SecurityController, UserResource
 
 

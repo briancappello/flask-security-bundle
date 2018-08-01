@@ -1,7 +1,6 @@
 import inspect
 
 from flask import current_app as app, request
-from flask_security import current_user
 from flask_security.forms import (
     EqualTo,
     Field,
@@ -15,7 +14,7 @@ from flask_unchained import unchained, injectable, lazy_gettext as _
 from wtforms import ValidationError, fields
 
 from .services import SecurityService
-from .utils import verify_and_update_password
+from .utils import current_user, verify_and_update_password
 
 
 password_equal = EqualTo(
