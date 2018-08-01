@@ -26,8 +26,15 @@ setup(
     packages=find_packages(exclude=['docs', 'tests']),
     install_requires=[
         'bcrypt>=3.1.3',
-        'flask-security>=3.0.0',
+        'blinker>=1.4',
+        'flask>=0.12.2',
+        'flask-babelex>=0.9.3',
+        'flask-login>=0.3.0',
+        'flask-principal>=0.3.3',
         'flask-unchained>=0.5.1',
+        'flask-wtf>=0.13.1',
+        'itsdangerous>=0.21',
+        'passlib>=1.7',
     ],
     extras_require={
         'dev': [
