@@ -50,7 +50,7 @@ class SecurityController(Controller):
 
         return self.render('login',
                            login_user_form=form,
-                           **self.security._run_ctx_processor('login'))
+                           **self.security.run_ctx_processor('login'))
 
     @route()
     def logout(self):
@@ -75,7 +75,7 @@ class SecurityController(Controller):
 
         return self.render('register',
                            register_user_form=form,
-                           **self.security._run_ctx_processor('register'))
+                           **self.security.run_ctx_processor('register'))
 
     @route(methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
@@ -96,7 +96,7 @@ class SecurityController(Controller):
 
         return self.render('send_confirmation_email',
                            send_confirmation_form=form,
-                           **self.security._run_ctx_processor('send_confirmation'))
+                           **self.security.run_ctx_processor('send_confirmation'))
 
     @route('/confirm/<token>',
            only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
@@ -152,7 +152,7 @@ class SecurityController(Controller):
 
         return self.render('forgot_password',
                            forgot_password_form=form,
-                           **self.security._run_ctx_processor('forgot_password'))
+                           **self.security.run_ctx_processor('forgot_password'))
 
     @route('/reset-password/<string:token>', methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_RECOVERABLE'))
@@ -194,7 +194,7 @@ class SecurityController(Controller):
         return self.render('reset_password',
                            reset_password_form=form,
                            reset_password_token=token,
-                           **self.security._run_ctx_processor('reset_password'))
+                           **self.security.run_ctx_processor('reset_password'))
 
     @route(methods=['GET', 'POST'],
            only_if=lambda app: app.config.get('SECURITY_CHANGEABLE'))
@@ -218,7 +218,7 @@ class SecurityController(Controller):
 
         return self.render('change_password',
                            change_password_form=form,
-                           **self.security._run_ctx_processor('change_password'))
+                           **self.security.run_ctx_processor('change_password'))
 
     def _get_form(self, name):
         form_cls = app.config.get(name)

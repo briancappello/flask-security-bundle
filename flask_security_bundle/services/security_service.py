@@ -228,5 +228,5 @@ class SecurityService(BaseService):
 
     def send_mail(self, subject, to, template, **kwargs):
         self.mail.send(subject, to, template, **dict(
-            **self.security._run_ctx_processor('mail'),
+            **self.security.run_ctx_processor('mail'),
             **kwargs))

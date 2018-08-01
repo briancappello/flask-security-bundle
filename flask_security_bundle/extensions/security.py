@@ -102,13 +102,9 @@ class Security(_SecurityConfigProperties):
     def mail_context_processor(self, fn):
         self._add_ctx_processor('mail', fn)
 
-    def _add_ctx_processor(self, endpoint, fn):
-        group = self._context_processors.setdefault(endpoint, [])
-        fn not in group and group.append(fn)
-
-    def _run_ctx_processor(self, endpoint):
+    def run_ctx_processor(self, endpoint) -> Dict[str, Any]:
         rv = {}
-        for group in [None, endpoint]:
+        for group in {None, endpoint}:
             for fn in self._context_processors.setdefault(group, []):
                 rv.update(fn())
         return rv
