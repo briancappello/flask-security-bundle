@@ -2,12 +2,10 @@
 
 ## 0.4.0 (unreleased)
 
-* we no longer depend on the `flask_security` package
-* automatically send the csrf token in the response cookie
+* we no longer depend on the `flask_security` package, only `flask_login`
 * use the default behavior of controllers to name endpoints (in effect, rename the prefixes from `security` to `security_controller`)
 * rename a translations keys for template h1 headings
 * rename email templates and service methods for consistency
-* move setting of the `csrf_token` cookie to flask unchained's controller bundle
 * refactor register form to always require password confirmation
 
 ## 0.3.0 (2018/07/25)
