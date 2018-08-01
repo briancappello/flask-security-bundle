@@ -207,13 +207,12 @@ class SecurityService(BaseService):
         token = security_generate_reset_password_token(user)
         reset_link = url_for('security_controller.reset_password',
                              token=token, _external=True)
-
-        if app.config.get('SECURITY_SEND_PASSWORD_RESET_EMAIL'):
-            self.send_mail(_('flask_security_bundle.email_subject.password_reset'),
-                           to=user.email,
-                           template='security/email/reset_instructions.html',
-                           user=user,
-                           reset_link=reset_link)
+        self.send_mail(
+            _('flask_security_bundle.email_subject.reset_password_instructions'),
+            to=user.email,
+            template='security/email/reset_password_instructions.html',
+            user=user,
+            reset_link=reset_link)
 
         reset_password_instructions_sent.send(app._get_current_object(),
                                               user=user, token=token)
