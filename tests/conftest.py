@@ -3,10 +3,40 @@ import pytest
 
 from datetime import datetime, timezone
 
+from flask_unchained import AppFactory, TEST
 from flask_unchained.bundles.sqlalchemy.pytest import *
 from flask_security_bundle.pytest import *
 
 from tests._bundles.security.models import User, Role, UserRole
+
+
+# we need to override the `app` and `db` fixtures to make them function-scoped
+# so that the only_if rules on routes work correctly with our @pytest.mark.options
+
+@pytest.fixture(autouse=True)
+def app(request):
+    """
+    Automatically used test fixture. Returns the application instance-under-test with
+    a valid app context.
+    """
+    unchained._reset()
+    options = request.keywords.get('options', None)
+    if options is not None:
+        options = {k.upper(): v for k, v in options.kwargs.items()}
+    app = AppFactory.create_app(TEST, _config_overrides=options)
+    ctx = app.app_context()
+    ctx.push()
+    yield app
+    ctx.pop()
+
+
+@pytest.fixture(autouse=True)
+def db(app):
+    db_ext = app.unchained.extensions.db
+    # FIXME might need to reflect the current db, drop, and then create...
+    db_ext.create_all()
+    yield db_ext
+    db_ext.drop_all()
 
 
 class UserFactory(ModelFactory):

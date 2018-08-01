@@ -1,6 +1,7 @@
 import pytest
 
 
+@pytest.mark.options(SECURITY_RECOVERABLE=True)
 @pytest.mark.usefixtures('user')
 class TestHtmlForgotPassword:
     def test_email_required(self, client, templates):
@@ -41,6 +42,7 @@ class TestHtmlForgotPassword:
         assert flash_msg in r.html
 
 
+@pytest.mark.options(SECURITY_RECOVERABLE=True)
 @pytest.mark.usefixtures('user')
 class TestApiForgotPassword:
     def test_email_required(self, api_client):

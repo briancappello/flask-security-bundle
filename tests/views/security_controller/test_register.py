@@ -3,7 +3,8 @@ import pytest
 from tests._bundles.security.forms import RegisterForm
 
 
-@pytest.mark.options(SECURITY_REGISTER_FORM=RegisterForm)
+@pytest.mark.options(SECURITY_REGISTERABLE=True,
+                     SECURITY_REGISTER_FORM=RegisterForm)
 class TestRegister:
     def test_get(self, client, templates):
         r = client.get('security_controller.register')
@@ -29,6 +30,7 @@ class TestRegister:
         assert templates[0].template.name == 'security/register.html'
         assert 'Password must be at least 8 characters long' in r.html
 
+    @pytest.mark.options(SECURITY_CONFIRMABLE=True)
     def test_register_confirmation_required(self, client, templates, outbox):
         r = client.post('security_controller.register', data=dict(
             username='hello',

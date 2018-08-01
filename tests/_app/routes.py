@@ -4,7 +4,7 @@ from flask_security_bundle import SecurityController, UserResource
 from .views import SiteController
 
 
-routes = [
+routes = lambda: [
     controller('/', SecurityController),
     controller('/', SiteController),
 

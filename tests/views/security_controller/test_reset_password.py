@@ -4,6 +4,7 @@ from flask_unchained import url_for
 from flask_security_bundle import AnonymousUser, current_user
 
 
+@pytest.mark.options(SECURITY_RECOVERABLE=True)
 @pytest.mark.usefixtures('user')
 class TestHtmlResetPassword:
     def test_anonymous_user_required(self, user, client, security_service,
@@ -106,6 +107,7 @@ class TestHtmlResetPassword:
         assert current_user == user
 
 
+@pytest.mark.options(SECURITY_RECOVERABLE=True)
 @pytest.mark.usefixtures('user')
 class TestApiResetPassword:
     def test_anonymous_user_required(self, user, api_client, security_service,

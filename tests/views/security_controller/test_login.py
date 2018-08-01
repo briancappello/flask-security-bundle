@@ -66,6 +66,7 @@ class TestApiLogin:
                             data=dict(email=user.email, password='password'))
         assert r.status_code == 401
 
+    @pytest.mark.options(SECURITY_CONFIRMABLE=True)
     @pytest.mark.user(confirmed_at=None)
     def test_confirmed_user_required(self, api_client, user,
                                      security_service: SecurityService,

@@ -1,6 +1,7 @@
 import pytest
 
 
+@pytest.mark.options(SECURITY_CONFIRMABLE=True)
 class TestHtmlSendConfirmationEmail:
     def test_email_required(self, client, templates):
         r = client.post('security_controller.send_confirmation_email')
@@ -17,7 +18,6 @@ class TestHtmlSendConfirmationEmail:
                'security/send_confirmation_email.html'
         assert 'Your email has already been confirmed.' in r.html
 
-    @pytest.mark.options(SECURITY_CONFIRMABLE=True)
     @pytest.mark.user(confirmed_at=None)
     def test_instructions_resent(self, client, user, outbox, templates,
                                  security_service):
@@ -45,6 +45,7 @@ class TestHtmlSendConfirmationEmail:
         assert msg in r.html
 
 
+@pytest.mark.options(SECURITY_CONFIRMABLE=True)
 class TestApiSendConfirmationEmail:
     def test_email_required(self, api_client):
         r = api_client.post('security_api.send_confirmation_email')

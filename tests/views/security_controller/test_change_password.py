@@ -3,6 +3,7 @@ import pytest
 from flask_security_bundle import current_user
 
 
+@pytest.mark.options(SECURITY_CHANGEABLE=True)
 @pytest.mark.usefixtures('user')
 class TestHtmlChangePassword:
     def test_auth_required(self, client):
@@ -60,6 +61,7 @@ class TestHtmlChangePassword:
         assert current_user == user
 
 
+@pytest.mark.options(SECURITY_CHANGEABLE=True)
 @pytest.mark.usefixtures('user')
 class TestApiChangePassword:
     def test_auth_required(self, api_client):
