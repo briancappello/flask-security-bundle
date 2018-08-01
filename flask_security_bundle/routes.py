@@ -2,7 +2,7 @@ from flask_unchained import controller, get, post, prefix, resource
 from flask_security_bundle import SecurityController, UserResource
 
 
-routes = [
+routes = lambda: [
     controller('/', SecurityController),
 
     # normally all these api endpoint renames wouldn't be necessary, but we
