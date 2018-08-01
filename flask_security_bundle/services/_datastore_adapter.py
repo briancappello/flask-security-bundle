@@ -1,34 +1,15 @@
-from flask_security.datastore import UserDatastore as BaseDatastore
-from flask_security.utils import get_identity_attributes
-from flask_unchained.bundles.sqlalchemy import SessionManager
+from flask_unchained import current_app
 
-from .role_manager import RoleManager
 from .user_manager import UserManager
 
 
-class DatastoreAdapter(BaseDatastore):
+class DatastoreAdapter:
     """
     A version of flask_security's UserDatastore that works with
     flask_unchained's dependency-injected services
     """
-    def __init__(self,
-                 user_manager: UserManager,
-                 role_manager: RoleManager,
-                 session_manager: SessionManager = None):
-        super().__init__(user_manager.model, role_manager.model)
+    def __init__(self, user_manager: UserManager):
         self.user_manager = user_manager
-        self.role_manager = role_manager
-        self.session_manager = session_manager
-
-    def put(self, instance):
-        self.session_manager.save(instance)
-
-    def delete(self, instance):
-        self.session_manager.delete(instance)
-
-    def commit(self):
-        if self.session_manager:
-            self.session_manager.commit()
 
     # FIXME-identity
     def get_user(self, identity):
@@ -39,11 +20,9 @@ class DatastoreAdapter(BaseDatastore):
             if user:
                 return user
 
+    # FIXME: the :meth:`_check_token` in `decorators/auth_required` depends on this
     def find_user(self, **kwargs):
         return self.user_manager.get_by(**kwargs)
-
-    def find_role(self, **kwargs):
-        return self.role_manager.get_by(**kwargs)
 
     def _is_numeric(self, value):
         try:
@@ -51,17 +30,12 @@ class DatastoreAdapter(BaseDatastore):
         except (TypeError, ValueError):
             return False
 
-    def _prepare_create_user_args(self, **kwargs):
-        roles = kwargs.get('roles', [])
-        for i, role in enumerate(roles):
-            if isinstance(role, str):
-                roles[i] = self.role_manager.get_by(name=role)
-        kwargs['roles'] = roles
-        return kwargs
 
-    def _prepare_role_modify_args(self, user, role):
-        if isinstance(user, str):
-            user = self.user_manager.get_by(email=user)
-        if isinstance(role, str):
-            role = self.role_manager.get_by(name=role)
-        return user, role
+# FIXME-identity
+def get_identity_attributes():
+    attrs = current_app.config['SECURITY_USER_IDENTITY_ATTRIBUTES']
+    try:
+        attrs = [f.strip() for f in attrs.split(',')]
+    except AttributeError:
+        pass
+    return attrs
