@@ -1,10 +1,11 @@
 from flask import _request_ctx_stack, current_app, request
 from flask_principal import Identity, identity_changed
+from flask_unchained import unchained, injectable
 from functools import wraps
 
 from .roles_accepted import roles_accepted
 from .roles_required import roles_required
-from ..utils import _security, current_user
+from ..utils import current_user
 
 
 def auth_required(*decorator_args, **decorator_kwargs):
@@ -36,7 +37,7 @@ def auth_required(*decorator_args, **decorator_kwargs):
 
     def wrapper(fn):
         @wraps(fn)
-        @_auth_required('session', 'token')
+        @_auth_required()
         @roles_required(*required_roles)
         @roles_accepted(*one_of_roles)
         def decorated(*args, **kwargs):
@@ -48,38 +49,29 @@ def auth_required(*decorator_args, **decorator_kwargs):
     return wrapper
 
 
-def _auth_required(*auth_methods):
+@unchained.inject('security')
+def _auth_required(security=injectable):
     """
     Decorator that protects enpoints through multiple mechanisms
-    Example::
-
-        @app.route('/dashboard')
-        @auth_required('token', 'session')
-        def dashboard():
-            return 'Dashboard'
-
-    :param auth_methods: Specified mechanisms.
     """
-    login_mechanisms = {
-        'token': lambda: _check_token(),
-        'session': lambda: current_user.is_authenticated
-    }
+    login_mechanisms = (
+        ('token', lambda: _check_token(security)),
+        ('session', lambda: current_user.is_authenticated),
+    )
 
     def wrapper(fn):
         @wraps(fn)
         def decorated_view(*args, **kwargs):
-            mechanisms = [(method, login_mechanisms.get(method))
-                          for method in auth_methods]
-            for method, mechanism in mechanisms:
+            for method, mechanism in login_mechanisms:
                 if mechanism and mechanism():
                     return fn(*args, **kwargs)
-            return _security._unauthorized_callback()
+            return security._unauthorized_callback()
         return decorated_view
     return wrapper
 
 
-def _check_token():
-    user = _security.login_manager.request_callback(request)
+def _check_token(security):
+    user = security.login_manager.request_callback(request)
 
     if user and user.is_authenticated:
         app = current_app._get_current_object()
