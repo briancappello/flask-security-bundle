@@ -8,6 +8,7 @@
 * rename email templates and service methods for consistency
 * refactor register form to always require password confirmation
 * refactor security utilities to be an injectable service
+* document config options
 
 ## 0.3.0 (2018/07/25)
 
