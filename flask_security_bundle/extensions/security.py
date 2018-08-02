@@ -47,7 +47,6 @@ class Security(_SecurityConfigProperties):
 
         # remaining properties are all set by `self.init_app`
         self.confirm_serializer = None
-        self.datastore = None
         self.hashing_context = None
         self.login_manager = None
         self.login_serializer = None
@@ -131,6 +130,9 @@ class Security(_SecurityConfigProperties):
     ##########################################
 
     def _get_hashing_context(self, app: FlaskUnchained) -> CryptContext:
+        """
+        Get the token hashing (and verifying) context.
+        """
         schemes = app.config.get('SECURITY_HASHING_SCHEMES')
         deprecated = app.config.get('SECURITY_DEPRECATED_HASHING_SCHEMES')
         return CryptContext(
@@ -141,6 +143,10 @@ class Security(_SecurityConfigProperties):
                            app: FlaskUnchained,
                            anonymous_user: AnonymousUser,
                            ) -> LoginManager:
+        """
+        Get an initialized instance of Flask Login's
+        :class:`~flask_login.LoginManager`.
+        """
         lm = LoginManager()
         lm.anonymous_user = anonymous_user or AnonymousUser
         lm.localize_callback = _
@@ -157,11 +163,18 @@ class Security(_SecurityConfigProperties):
         return lm
 
     def _get_principal(self, app: FlaskUnchained) -> Principal:
+        """
+        Get an initialized instance of Flask Principal's.
+        :class:~flask_principal.Principal`.
+        """
         p = Principal(app, use_sessions=False)
         p.identity_loader(self._identity_loader)
         return p
 
     def _get_pwd_context(self, app: FlaskUnchained) -> CryptContext:
+        """
+        Get the password hashing context.
+        """
         pw_hash = app.config.get('SECURITY_PASSWORD_HASH')
         schemes = app.config.get('SECURITY_PASSWORD_SCHEMES')
         deprecated = app.config.get('SECURITY_DEPRECATED_PASSWORD_SCHEMES')
@@ -177,8 +190,11 @@ class Security(_SecurityConfigProperties):
 
     def _get_serializer(self, app: FlaskUnchained, name: str) -> URLSafeTimedSerializer:
         """
+        Get a URLSafeTimedSerializer for the given serialization context name.
+
         :param app: the :class:`FlaskUnchained` instance
-        :param name: one of ``confirm``, ``login``, ``remember``, or ``reset``
+        :param name: Serialization context. One of ``confirm``, ``login``,
+          ``remember``, or ``reset``
         :return: URLSafeTimedSerializer
         """
         secret_key = app.config.get('SECRET_KEY')
@@ -186,11 +202,18 @@ class Security(_SecurityConfigProperties):
         return URLSafeTimedSerializer(secret_key=secret_key, salt=salt)
 
     def _identity_loader(self) -> Union[Identity, None]:
+        """
+        Identity loading function to be passed to be assigned to the Principal
+        instance returned by :meth:`_get_principal`.
+        """
         if not isinstance(current_user._get_current_object(), AnonymousUser):
             identity = Identity(current_user.id)
             return identity
 
     def _on_identity_loaded(self, sender, identity: Identity) -> None:
+        """
+        Callback that runs whenever a new identity has been loaded.
+        """
         if hasattr(current_user, 'id'):
             identity.provides.add(UserNeed(current_user.id))
 
@@ -200,6 +223,9 @@ class Security(_SecurityConfigProperties):
         identity.user = current_user
 
     def _request_loader(self, request: Request) -> Union[User, AnonymousUser]:
+        """
+        Attempt to load the user from the request token.
+        """
         header_key = self.token_authentication_header
         args_key = self.token_authentication_key
         header_token = request.headers.get(header_key, None)
