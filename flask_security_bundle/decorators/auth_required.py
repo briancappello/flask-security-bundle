@@ -8,7 +8,7 @@ from .roles_required import roles_required
 from ..utils import current_user
 
 
-def auth_required(*decorator_args, **decorator_kwargs):
+def auth_required(decorated_fn=None, **role_rules):
     """Decorator for requiring an authenticated user, optionally with roles
 
     Roles are passed as keyword arguments, like so:
@@ -24,35 +24,34 @@ def auth_required(*decorator_args, **decorator_kwargs):
     """
     required_roles = []
     one_of_roles = []
-    if not (decorator_args and callable(decorator_args[0])):
-        if 'role' in decorator_kwargs and 'roles' in decorator_kwargs:
+    if not (decorated_fn and callable(decorated_fn)):
+        if 'role' in role_rules and 'roles' in role_rules:
             raise RuntimeError('specify only one of `role` or `roles` kwargs')
-        elif 'role' in decorator_kwargs:
-            required_roles = [decorator_kwargs['role']]
-        elif 'roles' in decorator_kwargs:
-            required_roles = decorator_kwargs['roles']
+        elif 'role' in role_rules:
+            required_roles = [role_rules['role']]
+        elif 'roles' in role_rules:
+            required_roles = role_rules['roles']
 
-        if 'one_of' in decorator_kwargs:
-            one_of_roles = decorator_kwargs['one_of']
+        if 'one_of' in role_rules:
+            one_of_roles = role_rules['one_of']
 
     def wrapper(fn):
         @wraps(fn)
-        @_auth_required()
+        @unchained.inject(_auth_required)
         @roles_required(*required_roles)
         @roles_accepted(*one_of_roles)
         def decorated(*args, **kwargs):
             return fn(*args, **kwargs)
         return decorated
 
-    if decorator_args and callable(decorator_args[0]):
-        return wrapper(decorator_args[0])
+    if decorated_fn and callable(decorated_fn):
+        return wrapper(decorated_fn)
     return wrapper
 
 
-@unchained.inject('security')
 def _auth_required(security=injectable):
     """
-    Decorator that protects enpoints through multiple mechanisms
+    Decorator that protects endpoints through token and session auth mechanisms
     """
     login_mechanisms = (
         ('token', lambda: _check_token(security)),
@@ -74,9 +73,9 @@ def _check_token(security):
     user = security.login_manager.request_callback(request)
 
     if user and user.is_authenticated:
-        app = current_app._get_current_object()
         _request_ctx_stack.top.user = user
-        identity_changed.send(app, identity=Identity(user.id))
+        identity_changed.send(current_app._get_current_object(),
+                              identity=Identity(user.id))
         return True
 
     return False

@@ -70,7 +70,7 @@ class SecurityUtilsService(BaseService):
 
         return self.security.pwd_context.hash(
             password,
-            **current_app.config.get('SECURITY_PASSWORD_HASH_OPTIONS', {}).get(
+            **current_app.config.get('SECURITY_PASSWORD_HASH_OPTIONS').get(
                 current_app.config.get('SECURITY_PASSWORD_HASH'), {}))
 
     def hash_data(self, data):
