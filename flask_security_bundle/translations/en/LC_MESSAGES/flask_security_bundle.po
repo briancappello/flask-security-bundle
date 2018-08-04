@@ -135,7 +135,7 @@ msgid "flask_security_bundle.email_subject.password_changed_notice"
 msgstr "Your password has been changed."
 
 #: flask_security_bundle/services/security_service.py:168
-msgid "flask_security_bundle.email_subject.reset_password_instructions_notice"
+msgid "flask_security_bundle.email_subject.password_reset_notice"
 msgstr "Your password has been reset."
 
 #: flask_security_bundle/services/security_service.py:185
