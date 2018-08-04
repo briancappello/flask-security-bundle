@@ -3,7 +3,7 @@ import hashlib
 import hmac
 
 from datetime import timedelta
-from flask_unchained import BaseService, current_app, unchained, injectable
+from flask_unchained import BaseService, current_app, injectable
 from itsdangerous import BadSignature, SignatureExpired
 
 
@@ -13,10 +13,11 @@ class SecurityUtilsService(BaseService):
         self.user_manager = user_manager
 
     def get_hmac(self, password):
-        """Returns a Base64 encoded HMAC+SHA512 of the password signed with
+        """
+        Returns a Base64 encoded HMAC+SHA512 of the password signed with
         the salt specified by ``SECURITY_PASSWORD_SALT``.
 
-        :param password: The password to sign
+        :param password: The password to sign.
         """
         salt = current_app.config.get('SECURITY_PASSWORD_SALT')
 
@@ -30,13 +31,16 @@ class SecurityUtilsService(BaseService):
         return base64.b64encode(h.digest())
 
     def get_auth_token(self, user):
-        """Returns the user's authentication token."""
+        """
+        Returns the user's authentication token.
+        """
         data = [str(user.id),
                 self.security.hashing_context.hash(encode_string(user._password))]
         return self.security.remember_token_serializer.dumps(data)
 
     def verify_and_update_password(self, password, user):
-        """Returns ``True`` if the password is valid for the specified user.
+        """
+        Returns ``True`` if the password is valid for the specified user.
 
         Additionally, the hashed password in the database is updated if the
         hashing algorithm happens to have changed.
@@ -57,11 +61,10 @@ class SecurityUtilsService(BaseService):
         return verified
 
     def hash_password(self, password):
-        """Hash the specified plaintext password.
+        """
+        Hash the specified plaintext password.
 
         It uses the configured hashing options.
-
-        .. versionadded:: 2.0.2
 
         :param password: The plaintext password to hash
         """
@@ -74,14 +77,22 @@ class SecurityUtilsService(BaseService):
                 current_app.config.get('SECURITY_PASSWORD_HASH'), {}))
 
     def hash_data(self, data):
+        """
+        Hash data in the security token hashing context.
+        """
         return self.security.hashing_context.hash(encode_string(data))
 
     def verify_hash(self, hashed_data, compare_data):
+        """
+        Verify a hash in the security token hashing context.
+        """
         return self.security.hashing_context.verify(
             encode_string(compare_data), hashed_data)
 
     def use_double_hash(self, password_hash=None):
-        """Return a bool indicating whether a password should be hashed twice."""
+        """
+        Return a bool indicating whether a password should be hashed twice.
+        """
         single_hash = current_app.config.get('SECURITY_PASSWORD_SINGLE_HASH')
         if single_hash and self.security.password_salt:
             raise RuntimeError('You may not specify a salt with '
@@ -90,12 +101,14 @@ class SecurityUtilsService(BaseService):
         if password_hash is None:
             is_plaintext = self.security.password_hash == 'plaintext'
         else:
-            is_plaintext = self.security.pwd_context.identify(password_hash) == 'plaintext'
+            is_plaintext = \
+                self.security.pwd_context.identify(password_hash) == 'plaintext'
 
         return not (is_plaintext or single_hash)
 
     def generate_confirmation_token(self, user):
-        """Generates a unique confirmation token for the specified user.
+        """
+        Generates a unique confirmation token for the specified user.
 
         :param user: The user to work with
         """
@@ -103,7 +116,8 @@ class SecurityUtilsService(BaseService):
         return self.security.confirm_serializer.dumps(data)
 
     def confirm_email_token_status(self, token):
-        """Returns the expired status, invalid status, and user of a confirmation
+        """
+        Returns the expired status, invalid status, and user of a confirmation
         token. For example::
 
             expired, invalid, user = confirm_email_token_status('...')
@@ -120,7 +134,8 @@ class SecurityUtilsService(BaseService):
         return expired, invalid, user
 
     def generate_reset_password_token(self, user):
-        """Generates a unique reset password token for the specified user.
+        """
+        Generates a unique reset password token for the specified user.
 
         :param user: The user to work with
         """
@@ -129,7 +144,8 @@ class SecurityUtilsService(BaseService):
         return self.security.reset_serializer.dumps(data)
 
     def reset_password_token_status(self, token):
-        """Returns the expired status, invalid status, and user of a password reset
+        """
+        Returns the expired status, invalid status, and user of a password reset
         token. For example::
 
             expired, invalid, user, data = reset_password_token_status('...')
@@ -146,10 +162,9 @@ class SecurityUtilsService(BaseService):
 
         return expired, invalid, user
 
-    @unchained.inject('user_manager')
-    def get_token_status(self, token, serializer, max_age=None,
-                         return_data=False, user_manager=injectable):
-        """Get the status of a token.
+    def get_token_status(self, token, serializer, max_age=None, return_data=False):
+        """
+        Get the status of a token.
 
         :param token: The token to check
         :param serializer: The name of the serializer. Can be one of the
@@ -174,7 +189,7 @@ class SecurityUtilsService(BaseService):
             invalid = True
 
         if data:
-            user = user_manager.get(data[0])
+            user = self.user_manager.get(data[0])
 
         expired = expired and (user is not None)
 
@@ -184,7 +199,8 @@ class SecurityUtilsService(BaseService):
             return expired, invalid, user
 
     def get_within_delta(self, key):
-        """Get a timedelta object from the application configuration following
+        """
+        Get a timedelta object from the application configuration following
         the internal convention of::
 
             <Amount of Units> <Type of Units>
@@ -211,17 +227,16 @@ class SecurityUtilsService(BaseService):
         return attrs
 
     # FIXME-identity
-    @unchained.inject('user_manager')
-    def user_loader(self, user_identifier, user_manager=injectable):
+    def user_loader(self, user_identifier):
         try:
             user_identifier = int(user_identifier)
         except (ValueError, TypeError):
             for attr in self.get_identity_attributes():
-                user = user_manager.get_by(**{attr: user_identifier})
+                user = self.user_manager.get_by(**{attr: user_identifier})
                 if user:
                     return user
         else:
-            return user_manager.get(user_identifier)
+            return self.user_manager.get(user_identifier)
 
 
 def encode_string(string):

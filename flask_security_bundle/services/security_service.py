@@ -91,8 +91,11 @@ class SecurityService(BaseService):
 
     def process_login_errors(self, form):
         """
-        try not to leak excess account info without being too unfriendly to
-        actually-valid-users
+        An opportunity to modify the login form's error messages before returning
+        the response to the user. The idea is to try not to leak excess account info
+        without being too unfriendly to actually-valid-users.
+
+        :param form: An instance of the config option `SECURITY_LOGIN_FORM` class.
         """
         account_disabled = _('flask_security_bundle.error.disabled_account')
         confirmation_required = _('flask_security_bundle.error.confirmation_required')
@@ -112,10 +115,10 @@ class SecurityService(BaseService):
 
     def logout_user(self):
         """
-        Logs out the current user and cleans up the remember me cookie (if any)
+        Logs out the current user and cleans up the remember me cookie (if any).
 
-        sends signal identity_changed (from flask_principal)
-        sends signal user_logged_out (from flask_login)
+        Sends signal `identity_changed` (from flask_principal).
+        Sends signal `user_logged_out` (from flask_login).
         """
 
         for key in ('identity.name', 'identity.auth_type'):
@@ -126,9 +129,9 @@ class SecurityService(BaseService):
 
     def register_user(self, user):
         """
-        Performs the user registration process.
+        Service method to register a user.
 
-        sends signal user_registered
+        Sends signal `user_registered`.
 
         Returns True if the user has been logged in, False otherwise.
         """
@@ -161,37 +164,57 @@ class SecurityService(BaseService):
             return self.login_user(user)
         return False
 
-    def change_password(self, user, password):
+    def change_password(self, user, password, send_email=None):
+        """
+        Service method to change a user's password.
+
+        Sends signal `password_changed`.
+
+        :param user: The :class:`User`'s password to change.
+        :param password: The new password.
+        :param send_email: Whether or not to override the config option
+                           ``SECURITY_SEND_PASSWORD_CHANGED_EMAIL`` and force
+                           either sending or not sending an email.
+        """
         user.password = password
         self.user_manager.save(user)
-        password_changed.send(app._get_current_object(), user=user)
-
-        if app.config.get('SECURITY_SEND_PASSWORD_CHANGED_EMAIL'):
+        if send_email or (app.config.get('SECURITY_SEND_PASSWORD_CHANGED_EMAIL')
+                          and send_email is None):
             self.send_mail(
                 _('flask_security_bundle.email_subject.password_changed_notice'),
                 to=user.email,
                 template='security/email/password_changed_notice.html',
                 user=user)
+        password_changed.send(app._get_current_object(), user=user)
 
     def reset_password(self, user, password):
+        """
+        Service method to reset a user's password. The same as :meth:`change_password`
+        except we this method sends a different notification email.
+
+        Sends signal `password_reset`.
+
+        :param user:
+        :param password:
+        :return:
+        """
         user.password = password
         self.user_manager.save(user)
-        password_reset.send(app._get_current_object(), user=user)
-
         if app.config.get('SECURITY_SEND_PASSWORD_RESET_NOTICE_EMAIL'):
             self.send_mail(
-                _('flask_security_bundle.email_subject.reset_password_instructions_notice'),
+                _('flask_security_bundle.email_subject.password_reset_notice'),
                 to=user.email,
                 template='security/email/password_reset_notice.html',
                 user=user)
+        password_reset.send(app._get_current_object(), user=user)
 
     def send_email_confirmation_instructions(self, user):
         """
         Sends the confirmation instructions email for the specified user.
 
-        sends signal confirm_instructions_sent
+        Sends signal `confirm_instructions_sent`.
 
-        :param user: The user to send the instructions to
+        :param user: The user to send the instructions to.
         """
         token = self.security_utils_service.generate_confirmation_token(user)
         confirmation_link = url_for('security_controller.confirm_email',
@@ -202,7 +225,6 @@ class SecurityService(BaseService):
             template='security/email/email_confirmation_instructions.html',
             user=user,
             confirmation_link=confirmation_link)
-
         confirm_instructions_sent.send(app._get_current_object(), user=user,
                                        token=token)
 
@@ -210,7 +232,9 @@ class SecurityService(BaseService):
         """
         Sends the reset password instructions email for the specified user.
 
-        :param user: The user to send the instructions to
+        Sends signal `reset_password_instructions_sent`.
+
+        :param user: The user to send the instructions to.
         """
         token = self.security_utils_service.generate_reset_password_token(user)
         reset_link = url_for('security_controller.reset_password',
@@ -221,12 +245,16 @@ class SecurityService(BaseService):
             template='security/email/reset_password_instructions.html',
             user=user,
             reset_link=reset_link)
-
         reset_password_instructions_sent.send(app._get_current_object(),
                                               user=user, token=token)
 
     def confirm_user(self, user):
-        """Confirms the specified user"""
+        """
+        Confirms the specified user. Returns False if the user has already been
+        confirmed, True otherwise.
+
+        :param user: The user to confirm.
+        """
         if user.confirmed_at is not None:
             return False
         user.confirmed_at = self.security.datetime_factory()
@@ -236,7 +264,10 @@ class SecurityService(BaseService):
         user_confirmed.send(app._get_current_object(), user=user)
         return True
 
-    def send_mail(self, subject, to, template, **kwargs):
+    def send_mail(self, subject, to, template, **template_ctx):
+        """
+        Utility method to send mail with the `mail` template context.
+        """
         self.mail.send(subject, to, template, **dict(
             **self.security.run_ctx_processor('mail'),
-            **kwargs))
+            **template_ctx))

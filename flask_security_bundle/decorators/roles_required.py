@@ -5,9 +5,10 @@ from http import HTTPStatus
 
 
 def roles_required(*roles):
-    """Decorator which specifies that a user must have all the specified roles.
+    """
+    Decorator which specifies that a user must have all the specified roles.
 
-    Aborts with HTTP 403: Forbidden if the user doesn't have the required roles
+    Aborts with HTTP 403: Forbidden if the user doesn't have the required roles.
 
     Example::
 

@@ -4,6 +4,11 @@ from .user_role import UserRole
 
 
 class Role(db.Model):
+    """
+    Base :class`Role` model. Includes an :attr:`name` column and a many-to-many
+    relationship with the :class:`User` model via the intermediary :class:`UserRole`
+    join table.
+    """
     class Meta:
         lazy_mapped = True
 

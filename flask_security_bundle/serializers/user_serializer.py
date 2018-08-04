@@ -9,6 +9,9 @@ from ..services import UserManager
 
 
 class UserSerializer(ma.ModelSerializer):
+    """
+    Marshmallow serializer for the :class:`User` model.
+    """
     email = ma.Email(required=True)
     roles = ma.Nested('RoleSerializer', only='name', many=True)
 

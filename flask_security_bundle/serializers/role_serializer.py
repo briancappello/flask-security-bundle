@@ -5,6 +5,9 @@ except ImportError:
 
 
 class RoleSerializer(ma.ModelSerializer):
+    """
+    Marshmallow serializer for the :class:`Role` model.
+    """
     class Meta:
         model = 'Role'
-        fields = ('id', 'name', 'description')
+        fields = ('id', 'name')

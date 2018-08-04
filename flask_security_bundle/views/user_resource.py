@@ -10,6 +10,9 @@ from ..services import SecurityService
 
 
 class UserResource(ModelResource):
+    """
+    RESTful API resource for the :class:`User` model.
+    """
     model = 'User'
 
     include_methods = {CREATE, GET, PATCH}

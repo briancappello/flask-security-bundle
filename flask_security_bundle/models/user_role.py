@@ -2,7 +2,9 @@ from flask_unchained.bundles.sqlalchemy import db
 
 
 class UserRole(db.Model):
-    """Join table between User and Role"""
+    """
+    Join table between the :class:`User` and :class:`Role` models.
+    """
     class Meta:
         lazy_mapped = True
         pk = None

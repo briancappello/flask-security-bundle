@@ -5,10 +5,11 @@ from http import HTTPStatus
 
 
 def roles_accepted(*roles):
-    """Decorator which specifies that a user must have at least one of the
+    """
+    Decorator which specifies that a user must have at least one of the
     specified roles.
 
-    Aborts with HTTP: 403 if the user doesn't have at least one of the roles
+    Aborts with HTTP: 403 if the user doesn't have at least one of the roles.
 
     Example::
 

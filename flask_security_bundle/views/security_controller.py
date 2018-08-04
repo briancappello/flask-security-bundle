@@ -22,10 +22,14 @@ class SecurityController(Controller):
         self.security_utils_service = security_utils_service
         self.session_manager = session_manager
 
-    # require check_auth_token to be explicitly enabled
     @route(only_if=False)
     @auth_required()
     def check_auth_token(self):
+        """
+        View function to check a token, and if it's valid, log the user in.
+
+        Disabled by default; must be explicitly enabled in your ``routes.py``.
+        """
         # the auth_required decorator verifies the token and sets current_user,
         # just need to return a success response
         return self.jsonify({'user': current_user})
@@ -33,6 +37,9 @@ class SecurityController(Controller):
     @route(methods=['GET', 'POST'])
     @anonymous_user_required(msg='You are already logged in', category='success')
     def login(self):
+        """
+        View function to log a user in. Supports html and json requests.
+        """
         form = self._get_form('SECURITY_LOGIN_FORM')
         if (form.validate_on_submit()
                 and self.security_service.login_user(form.user, form.remember.data)):
@@ -56,6 +63,9 @@ class SecurityController(Controller):
 
     @route()
     def logout(self):
+        """
+        View function to log a user out. Supports html and json requests.
+        """
         if current_user.is_authenticated:
             self.security_service.logout_user()
 
@@ -69,6 +79,9 @@ class SecurityController(Controller):
            only_if=lambda app: app.config.get('SECURITY_REGISTERABLE'))
     @anonymous_user_required
     def register(self):
+        """
+        View function to register user. Supports html and json requests.
+        """
         form = self._get_form('SECURITY_REGISTER_FORM')
         if form.validate_on_submit():
             user = self.security_service.user_manager.create(**form.to_dict())
@@ -83,7 +96,7 @@ class SecurityController(Controller):
            only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
     def send_confirmation_email(self):
         """
-        View function which sends confirmation instructions
+        View function which sends confirmation token and instructions to a user.
         """
         form = self._get_form('SECURITY_SEND_CONFIRMATION_FORM')
         if form.validate_on_submit():
@@ -98,11 +111,15 @@ class SecurityController(Controller):
 
         return self.render('send_confirmation_email',
                            send_confirmation_form=form,
-                           **self.security.run_ctx_processor('send_confirmation'))
+                           **self.security.run_ctx_processor('send_confirmation_email'))
 
     @route('/confirm/<token>',
            only_if=lambda app: app.config.get('SECURITY_CONFIRMABLE'))
     def confirm_email(self, token):
+        """
+        View function to confirm a user's token from the confirmation email send to them.
+        Supports html and json requests.
+        """
         expired, invalid, user = \
             self.security_utils_service.confirm_email_token_status(token)
         if not user or invalid:
@@ -142,6 +159,10 @@ class SecurityController(Controller):
     @anonymous_user_required(msg='You are already logged in',
                              category='success')
     def forgot_password(self):
+        """
+        View function to request a password recovery email with a reset token.
+        Supports html and json requests.
+        """
         form = self._get_form('SECURITY_FORGOT_PASSWORD_FORM')
         if form.validate_on_submit():
             self.security_service.send_reset_password_instructions(form.user)
@@ -161,6 +182,11 @@ class SecurityController(Controller):
            only_if=lambda app: app.config.get('SECURITY_RECOVERABLE'))
     @anonymous_user_required
     def reset_password(self, token):
+        """
+        View function verify a users reset password token from the email we sent to them.
+        It also handles the form for them to set a new password.
+        Supports html and json requests.
+        """
         expired, invalid, user = \
             self.security_utils_service.reset_password_token_status(token)
         if invalid:
@@ -204,6 +230,10 @@ class SecurityController(Controller):
            only_if=lambda app: app.config.get('SECURITY_CHANGEABLE'))
     @auth_required
     def change_password(self):
+        """
+        View function for a user to change their password.
+        Supports html and json requests.
+        """
         form = self._get_form('SECURITY_CHANGE_PASSWORD_FORM')
         if form.validate_on_submit():
             self.security_service.change_password(

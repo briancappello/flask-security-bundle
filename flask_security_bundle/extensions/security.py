@@ -57,8 +57,7 @@ class Security(_SecurityConfigProperties):
 
     def inject_services(self,
                         security_utils_service: SecurityUtilsService = injectable,
-                        user_manager: UserManager = injectable,
-                        ):
+                        user_manager: UserManager = injectable):
         self.security_utils_service = security_utils_service
         self.user_manager = user_manager
 
@@ -86,30 +85,69 @@ class Security(_SecurityConfigProperties):
     ######################################################
 
     def context_processor(self, fn):
+        """
+        Add a context processor that runs for every view with a template in the
+        security bundle.
+
+        :param fn: A function that returns a dictionary of template context variables.
+        """
         self._add_ctx_processor(None, fn)
 
     def forgot_password_context_processor(self, fn):
+        """
+        Add a context processor for the :meth:`SecurityController.forgot_password` view.
+
+        :param fn: A function that returns a dictionary of template context variables.
+        """
         self._add_ctx_processor('forgot_password', fn)
 
     def login_context_processor(self, fn):
+        """
+        Add a context processor for the :meth:`SecurityController.login` view.
+
+        :param fn: A function that returns a dictionary of template context variables.
+        """
         self._add_ctx_processor('login', fn)
 
     def register_context_processor(self, fn):
+        """
+        Add a context processor for the :meth:`SecurityController.register` view.
+
+        :param fn: A function that returns a dictionary of template context variables.
+        """
         self._add_ctx_processor('register', fn)
 
     def reset_password_context_processor(self, fn):
+        """
+        Add a context processor for the :meth:`SecurityController.reset_password` view.
+
+        :param fn: A function that returns a dictionary of template context variables.
+        """
         self._add_ctx_processor('reset_password', fn)
 
     def change_password_context_processor(self, fn):
+        """
+        Add a context processor for the :meth:`SecurityController.change_password` view.
+
+        :param fn: A function that returns a dictionary of template context variables.
+        """
         self._add_ctx_processor('change_password', fn)
 
     def send_confirmation_context_processor(self, fn):
-        self._add_ctx_processor('send_confirmation', fn)
+        """
+        Add a context processor for the
+        :meth:`SecurityController.send_confirmation_email` view.
 
-    def send_login_context_processor(self, fn):
-        self._add_ctx_processor('send_login', fn)
+        :param fn: A function that returns a dictionary of template context variables.
+        """
+        self._add_ctx_processor('send_confirmation_email', fn)
 
     def mail_context_processor(self, fn):
+        """
+        Add a context processor to be used when rendering all the email templates.
+
+        :param fn: A function that returns a dictionary of template context variables.
+        """
         self._add_ctx_processor('mail', fn)
 
     def run_ctx_processor(self, endpoint) -> Dict[str, Any]:
