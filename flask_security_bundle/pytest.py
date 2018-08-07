@@ -51,8 +51,8 @@ class SecurityApiTestClient(SecurityTestClient):
 
 @pytest.fixture()
 def client(app):
-    for bundle in app.unchained.bundles:
-        if issubclass(bundle, FlaskSecurityBundle):
+    for bundle in app.unchained.bundles.values():
+        if isinstance(bundle, FlaskSecurityBundle):
             app.test_client_class = SecurityTestClient
             app.response_class = HtmlTestResponse
             break
@@ -63,8 +63,8 @@ def client(app):
 
 @pytest.fixture()
 def api_client(app):
-    for bundle in app.unchained.bundles:
-        if issubclass(bundle, FlaskSecurityBundle):
+    for bundle in app.unchained.bundles.values():
+        if isinstance(bundle, FlaskSecurityBundle):
             app.test_client_class = SecurityApiTestClient
             app.response_class = ApiTestResponse
             break
