@@ -1,11 +1,13 @@
 from flask import _request_ctx_stack, current_app, request
 from flask_principal import Identity, identity_changed
-from flask_unchained import unchained, injectable
+from flask_unchained import unchained
 from functools import wraps
 
 from .roles_accepted import roles_accepted
 from .roles_required import roles_required
 from ..utils import current_user
+
+security = unchained.extensions.security
 
 
 def auth_required(decorated_fn=None, **role_rules):
@@ -38,7 +40,7 @@ def auth_required(decorated_fn=None, **role_rules):
 
     def wrapper(fn):
         @wraps(fn)
-        @unchained.inject(_auth_required)
+        @_auth_required()
         @roles_required(*required_roles)
         @roles_accepted(*one_of_roles)
         def decorated(*args, **kwargs):
@@ -50,12 +52,13 @@ def auth_required(decorated_fn=None, **role_rules):
     return wrapper
 
 
-def _auth_required(security=injectable):
+def _auth_required():
     """
     Decorator that protects endpoints through token and session auth mechanisms
     """
+
     login_mechanisms = (
-        ('token', lambda: _check_token(security)),
+        ('token', lambda: _check_token()),
         ('session', lambda: current_user.is_authenticated),
     )
 
@@ -70,7 +73,7 @@ def _auth_required(security=injectable):
     return wrapper
 
 
-def _check_token(security):
+def _check_token():
     user = security.login_manager.request_callback(request)
 
     if user and user.is_authenticated:

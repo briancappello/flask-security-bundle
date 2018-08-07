@@ -14,7 +14,7 @@ class MethodCalled(Exception):
 
 @pytest.mark.usefixtures('user')
 class TestAuthRequired:
-    def test_decorated_with_without_parenthesis(self):
+    def test_decorated_with_parenthesis(self):
         @auth_required()
         def method():
             raise MethodCalled
@@ -22,6 +22,7 @@ class TestAuthRequired:
         with pytest.raises(Unauthorized):
             method()
 
+    def test_decorated_without_parenthesis(self):
         @auth_required
         def method():
             raise MethodCalled
