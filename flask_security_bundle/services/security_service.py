@@ -18,10 +18,11 @@ from ..signals import (confirm_instructions_sent, reset_password_instructions_se
 
 class SecurityService(BaseService):
     def __init__(self,
-                 mail: Mail = injectable,
                  security: Security = injectable,
                  security_utils_service: SecurityUtilsService = injectable,
-                 user_manager: UserManager = injectable):
+                 user_manager: UserManager = injectable,
+                 mail: Optional[Mail] = None,  # injectable, but optional
+                 ):
         self.mail = mail
         self.security = security
         self.security_utils_service = security_utils_service
@@ -272,6 +273,12 @@ class SecurityService(BaseService):
         """
         Utility method to send mail with the `mail` template context.
         """
+        if not self.mail:
+            from warnings import warn
+            warn('Attempting to send mail without the mail bundle installed! '
+                 'Please install it, or fix your configuration.')
+            return
+
         self.mail.send(subject, to, template, **dict(
             **self.security.run_ctx_processor('mail'),
             **template_ctx))
