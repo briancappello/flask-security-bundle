@@ -3,6 +3,6 @@ from flask_unchained.bundles.sqlalchemy import db
 
 
 class User(BaseUser):
-    username = db.Column(db.String(64))
-    first_name = db.Column(db.String(64))
-    last_name = db.Column(db.String(64))
+    username = db.Column(db.String(64), nullable=True)
+    first_name = db.Column(db.String(64), nullable=True)
+    last_name = db.Column(db.String(64), nullable=True)

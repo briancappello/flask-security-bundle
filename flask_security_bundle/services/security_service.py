@@ -127,7 +127,7 @@ class SecurityService(BaseService):
                               identity=AnonymousIdentity())
         _logout_user()
 
-    def register_user(self, user):
+    def register_user(self, user, allow_login=None, send_email=None):
         """
         Service method to register a user.
 
@@ -137,6 +137,8 @@ class SecurityService(BaseService):
         """
         should_login_user = (not self.security.confirmable
                              or self.security.login_without_confirmation)
+        should_login_user = (should_login_user if allow_login is None
+                             else allow_login and should_login_user)
         if should_login_user:
             user.active = True
 
@@ -153,7 +155,9 @@ class SecurityService(BaseService):
         user_registered.send(app._get_current_object(),
                              user=user, confirm_token=token)
 
-        if app.config.get('SECURITY_SEND_REGISTER_EMAIL'):
+        if (send_email or (
+                send_email is None
+                and app.config.get('SECURITY_SEND_REGISTER_EMAIL'))):
             self.send_mail(_('flask_security_bundle.email_subject.register'),
                            to=user.email,
                            template='security/email/welcome.html',

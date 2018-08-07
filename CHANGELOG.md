@@ -9,6 +9,7 @@
 * refactor register form to always require password confirmation
 * refactor security utilities to be an injectable service
 * document config options
+* implement ``flask users`` and ``flask roles`` cli command groups
 
 ## 0.3.0 (2018/07/25)
 

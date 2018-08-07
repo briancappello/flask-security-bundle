@@ -85,9 +85,33 @@ def user(request):
 
 
 @pytest.fixture()
+def users(request):
+    users_request = request.keywords.get('users')
+    if not users_request:
+        return
+
+    rv = []
+    for kwargs in users_request.args:
+        rv.append(UserWithTwoRolesFactory(**kwargs))
+    return rv
+
+
+@pytest.fixture()
 def role(request):
     kwargs = getattr(request.keywords.get('role'), 'kwargs', {})
     return RoleFactory(**kwargs)
+
+
+@pytest.fixture()
+def roles(request):
+    roles_request = request.keywords.get('roles')
+    if not roles_request:
+        return
+
+    rv = []
+    for kwargs in roles_request.args:
+        rv.append(RoleFactory(**kwargs))
+    return rv
 
 
 @pytest.fixture()
