@@ -170,6 +170,8 @@ class RegisterForm(BaseForm, PasswordFormMixin, NextFormMixin):
 
     submit = SubmitField(_('flask_security_bundle.form_submit.register'))
 
+    field_order = ('email', 'password', 'password_confirm', 'submit')
+
     def to_dict(self):
         def is_field_and_user_attr(member):
             return isinstance(member, Field) and hasattr(self.Meta.model, member.name)
