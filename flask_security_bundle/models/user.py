@@ -66,13 +66,17 @@ class User(db.Model):
 
     @unchained.inject('security_utils_service')
     def get_auth_token(self, security_utils_service=injectable):
-        """Returns the user's authentication token."""
+        """
+        Returns the user's authentication token.
+        """
         return security_utils_service.get_auth_token(self)
 
     def has_role(self, role):
-        """Returns `True` if the user identifies with the specified role.
+        """
+        Returns `True` if the user identifies with the specified role.
 
-        :param role: A role name or `Role` instance"""
+        :param role: A role name or :class:`Role` instance
+        """
         if isinstance(role, str):
             return role in (role.name for role in self.roles)
         else:
