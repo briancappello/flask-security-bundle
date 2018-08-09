@@ -47,8 +47,7 @@ class SecurityController(Controller):
             if request.is_json:
                 return self.jsonify({'token': form.user.get_auth_token(),
                                      'user': form.user})
-            self.flash(_('flask_security_bundle.flash.login', user=form.user.first_name),
-                       category='success')
+            self.flash(_('flask_security_bundle.flash.login'), category='success')
             return self.redirect('SECURITY_POST_LOGIN_REDIRECT_ENDPOINT')
 
         elif form.errors:

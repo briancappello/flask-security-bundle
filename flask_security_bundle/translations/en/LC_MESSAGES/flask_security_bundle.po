@@ -172,7 +172,7 @@ msgstr "Resend Confirmation Email"
 
 #: flask_security_bundle/views/security_controller.py:41
 msgid "flask_security_bundle.flash.login"
-msgstr "Welcome %(user)s!"
+msgstr "Welcome!"
 
 #: flask_security_bundle/views/security_controller.py:63
 msgid "flask_security_bundle.flash.logout"
