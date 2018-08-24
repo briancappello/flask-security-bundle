@@ -8,7 +8,7 @@
     :license: MIT, see LICENSE for more details
 """
 
-__version__ = '0.3.0'
+__version__ = '0.4.0'
 
 
 from flask_unchained import Bundle

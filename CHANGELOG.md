@@ -1,8 +1,8 @@
 # CHANGELOG
 
-## 0.4.0 (unreleased)
+## 0.4.0 (2018/08/24)
 
-* we no longer depend on the `flask_security` package, only `flask_login`
+* we no longer depend on the `flask_security` package
 * use the default behavior of controllers to name endpoints (in effect, rename the prefixes from `security` to `security_controller`)
 * rename a translations keys for template h1 headings
 * rename email templates and service methods for consistency
